@@ -1,0 +1,342 @@
+﻿@model ProyectoMDGSharksWeb.Models.Torneo
+@{
+    ViewBag.Title = "Editar Torneo";
+    var torneoId = ViewBag.TorneoId;
+    var entrada = ViewBag.Entrada;
+    var nombre = ViewBag.Nombre;
+    var fecha = ViewBag.Fecha;
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    input[type="text"], input[type="number"], select {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    input[readonly] {
+        background-color: #e9ecef;
+        cursor: not-allowed;
+    }
+
+    .btn-submit, .btn-cancelar {
+        padding: 10px 20px;
+        margin-top: 10px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+
+    .btn-crear-cliente {
+        display: inline-block;
+        background-color: #28a745;
+        color: white;
+        padding: 10px 18px;
+        margin-top: 10px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-crear-cliente:hover {
+            background-color: #1e7e34;
+        }
+
+    #clienteList {
+        border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        background-color: white;
+        width: 100%;
+        z-index: 1000;
+        display: none;
+    }
+
+        #clienteList div {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+            #clienteList div:hover {
+                background-color: #00bfff;
+                color: white;
+            }
+
+    .input-wrapper {
+        position: relative;
+        max-width: 400px;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        table-layout: fixed;
+    }
+
+    colgroup col:nth-child(1) {
+        width: 50%;
+    }
+
+    colgroup col:nth-child(2) {
+        width: 35%;
+    }
+
+    colgroup col:nth-child(3) {
+        width: 15%;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        word-wrap: break-word;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .acciones button {
+        background: none;
+        border: none;
+        color: crimson;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .acciones button:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<h1>Editar Torneo</h1>
+
+<div>
+    <label>Nombre del Torneo</label>
+    <input type="text" value="@nombre" readonly />
+</div>
+<div>
+    <label>Fecha</label>
+    <input type="text" value="@fecha" readonly />
+</div>
+<div>
+    <label>Entrada (Bs)</label>
+    <input type="number" id="entradaTorneo" value="@entrada" readonly />
+</div>
+
+<hr />
+
+<h2>Modificar Participantes</h2>
+<div class="input-wrapper">
+    <label>Buscar Cliente</label>
+    <input type="hidden" id="IdCliente" />
+    <input type="text" id="clienteInput" placeholder="Nombre completo..." autocomplete="off" />
+    <div id="clienteList"></div>
+</div>
+<a href="/Clientes/Create" target="_blank" class="btn-crear-cliente">+ Crear cliente nuevo</a>
+
+<div>
+    <label>Tipo de Pago</label>
+    <select id="TipoPago">
+        <option value="Efectivo">Efectivo</option>
+        <option value="QR">QR</option>
+        <option value="Transferencia">Transferencia</option>
+        <option value="Tarjeta">Tarjeta</option>
+    </select>
+</div>
+
+<button type="button" class="btn-submit" onclick="agregarParticipante()">Agregar/Actualizar Participante</button>
+
+<h2>Participantes Inscritos</h2>
+<table>
+    <colgroup>
+        <col />
+        <col />
+        <col />
+    </colgroup>
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Tipo de Pago</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tablaParticipantes"></tbody>
+</table>
+
+<form asp-action="GuardarCambiosEdicion" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" name="idTorneo" value="@torneoId" />
+    <button type="submit" class="btn-submit">Guardar Cambios</button>
+    <a href="@Url.Action("Index", "Torneos")" class="btn-cancelar">Cancelar</a>
+</form>
+
+@section Scripts {
+    <script>
+        const input = document.getElementById('clienteInput');
+        const list = document.getElementById('clienteList');
+        const hiddenId = document.getElementById('IdCliente');
+        const entrada = parseFloat(document.getElementById('entradaTorneo').value);
+        let clientes = [];
+
+        async function buscarClientes(term) {
+            const response = await fetch('/Torneos/BuscarClientes?term=' + encodeURIComponent(term));
+            const data = await response.json();
+            clientes = data;
+            mostrarLista(data);
+        }
+
+        function mostrarLista(data) {
+            list.innerHTML = '';
+            if (!data.length) {
+                list.innerHTML = '<div>No se encontraron resultados</div>';
+                list.style.display = 'block';
+                return;
+            }
+            data.forEach(c => {
+                const div = document.createElement('div');
+                div.textContent = c.nombreCompleto;
+                div.setAttribute('data-id', c.id);
+                div.onclick = () => {
+                    input.value = div.textContent;
+                    hiddenId.value = div.getAttribute('data-id');
+                    list.style.display = 'none';
+                };
+                list.appendChild(div);
+            });
+            list.style.display = 'block';
+        }
+
+        input.addEventListener('input', () => {
+            const term = input.value.trim();
+            hiddenId.value = '';
+            if (term.length > 1) buscarClientes(term);
+            else list.style.display = 'none';
+        });
+
+        function agregarParticipante() {
+            const idCliente = parseInt(document.getElementById('IdCliente').value);
+            const tipoPago = document.getElementById('TipoPago').value;
+
+            if (!idCliente) {
+                alert("Debe seleccionar un cliente válido");
+                return;
+            }
+
+            const dto = {
+                IdCliente: idCliente,
+                Pago: entrada,
+                TipoPago: tipoPago
+            };
+
+            fetch('/Torneos/AgregarParticipanteEdit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(dto)
+            }).then(res => {
+                if (res.ok) {
+                    limpiarFormulario();
+                    cargarTabla();
+                } else {
+                    alert("No se pudo agregar el participante");
+                }
+            });
+        }
+
+        function eliminar(idCliente) {
+            fetch('/Torneos/EliminarParticipanteEdit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': document.querySelector('input[name="__RequestVerificationToken"]').value
+                },
+                body: JSON.stringify(idCliente)
+            }).then(() => cargarTabla());
+        }
+
+        function cargarTabla() {
+            fetch('/Torneos/ObtenerParticipantesEdit')
+                .then(resp => resp.json())
+                .then(data => {
+                    const tabla = document.getElementById('tablaParticipantes');
+                    tabla.innerHTML = '';
+                    data.forEach(p => {
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${p.clienteNombre}</td>
+                                <td>${p.tipoPago}</td>
+                                <td class='acciones'>
+                                    <button type="button" onclick="editar(${p.idCliente})">Editar</button>
+                                    <button type="button" onclick="eliminar(${p.idCliente})">Eliminar</button>
+                                </td>
+                            </tr>`;
+                    });
+                });
+        }
+
+        function editar(idCliente) {
+            fetch('/Torneos/ObtenerParticipantesEdit')
+                .then(resp => resp.json())
+                .then(data => {
+                    const cliente = data.find(c => c.idCliente === idCliente);
+                    if (cliente) {
+                        document.getElementById('clienteInput').value = cliente.clienteNombre;
+                        document.getElementById('IdCliente').value = cliente.idCliente;
+                        document.getElementById('TipoPago').value = cliente.tipoPago;
+                    }
+                });
+        }
+
+        function limpiarFormulario() {
+            document.getElementById('clienteInput').value = '';
+            document.getElementById('IdCliente').value = '';
+            document.getElementById('TipoPago').selectedIndex = 0;
+        }
+
+        document.addEventListener('DOMContentLoaded', cargarTabla);
+    </script>
+}

@@ -1,0 +1,120 @@
+﻿@model ProyectoMDGSharksWeb.Models.Torneo
+@{
+    ViewBag.Title = "Detalles del Torneo";
+    var participantes = ViewBag.Participantes as List<ProyectoMDGSharksWeb.Controllers.TorneosController.ParticipanteViewData> ?? new List<ProyectoMDGSharksWeb.Controllers.TorneosController.ParticipanteViewData>();
+   Console.WriteLine("[DEBUG] Mostrando detalles del torneo con ID: " + Model.Id);
+}
+
+<h1>Detalles del Torneo</h1>
+
+<div>
+    <p><strong>ID:</strong> @Model.Id</p>
+    <p><strong>Nombre:</strong> @Model.Nombre</p>
+    <p><strong>Fecha:</strong> @Model.Fecha.ToString("yyyy-MM-dd")</p>
+    <p><strong>Entrada:</strong> @Model.Entrada.ToString("F2") Bs</p>
+</div>
+
+<h2>Participantes</h2>
+<div style="overflow-x:auto">
+    <table class="table">
+        <colgroup>
+            <col style="width: 30%">
+            <col style="width: 20%">
+            <col style="width: 20%">
+            <col style="width: 30%">
+        </colgroup>
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Pago</th>
+                <th>Tipo de Pago</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (participantes.Any())
+            {
+                foreach (var p in participantes)
+                {
+                    <tr>
+                        <td>@p.NombreCliente</td>
+                        <td>@p.Pago.ToString("F2") Bs</td>
+                        <td>@p.TipoPago</td>
+                        <td>
+                            <a href="@Url.Action("Details", "Clientes", new { id = p.IdCliente })" class="btn btn-submit">Ver Cliente</a>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr>
+                    <td colspan="4">No hay participantes registrados.</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<a href="@Url.Action("Index", "Torneos")" class="btn btn-cancelar">Volver</a>
+
+<style>
+    h1, h2 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        table-layout: fixed;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        word-wrap: break-word;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-top: 20px;
+        display: inline-block;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+        padding: 8px 14px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+</style>

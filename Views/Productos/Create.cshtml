@@ -1,0 +1,224 @@
+﻿@model ProyectoMDGSharksWeb.Models.Producto
+
+@{
+    ViewBag.Title = "Crear Producto";
+}
+
+<style>
+    h1 {
+        font-weight: 700;
+        color: var(--azul-oscuro);
+        user-select: none;
+    }
+
+    label {
+        font-weight: 600;
+        color: var(--azul-oscuro);
+    }
+
+    input[type=text], textarea, input[type=number] {
+        width: 100%;
+        padding: 8px;
+        margin-top: 5px;
+        margin-bottom: 15px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+
+    .btn-submit {
+        background-color: var(--celeste);
+        color: var(--blanco);
+        padding: 10px 20px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-submit:hover {
+            background-color: var(--azul-oscuro);
+        }
+
+    .error-msg {
+        color: crimson;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    #categoriaList {
+        border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        background-color: white;
+        width: 100%;
+        z-index: 1000;
+        border-radius: 0 0 5px 5px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        color: black;
+        display: none;
+    }
+
+        #categoriaList div {
+            padding: 8px;
+            cursor: pointer;
+            color: black;
+        }
+
+            #categoriaList div:hover {
+                background-color: var(--celeste);
+                color: var(--azul-oscuro);
+            }
+
+    .input-wrapper {
+        position: relative;
+        width: 100%;
+        max-width: 300px;
+    }
+</style>
+
+<h1>Crear Producto</h1>
+
+<div asp-validation-summary="ModelOnly" class="error-msg"></div>
+
+<form asp-action="Create" method="post" id="formCrearProducto" novalidate>
+    @Html.AntiForgeryToken()
+
+    <div>
+        <label asp-for="Nombre"></label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label asp-for="Descripcion"></label>
+        <textarea asp-for="Descripcion" rows="3" class="form-control"></textarea>
+        <span asp-validation-for="Descripcion" class="error-msg"></span>
+    </div>
+
+    <div class="input-wrapper">
+        <label>Categoría</label>
+        <input type="hidden" asp-for="IdCategoria" id="IdCategoria" />
+        <input type="text" id="categoriaInput" autocomplete="off" placeholder="Buscar categoría..." class="form-control" />
+        <div id="categoriaList"></div>
+        <span asp-validation-for="IdCategoria" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label asp-for="PrecioCompra"></label>
+        <input asp-for="PrecioCompra" type="number" step="0.01" min="0" class="form-control" />
+        <span asp-validation-for="PrecioCompra" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label asp-for="PrecioVenta"></label>
+        <input asp-for="PrecioVenta" type="number" step="0.01" min="0" class="form-control" />
+        <span asp-validation-for="PrecioVenta" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label asp-for="PrecioSharkcoins"></label>
+        <input asp-for="PrecioSharkcoins" type="number" step="0.01" min="0" class="form-control" />
+        <span asp-validation-for="PrecioSharkcoins" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label>Stock Inicial</label>
+        <input type="number" name="stockInicial" min="0" step="1" class="form-control" />
+    </div>
+
+    <button type="submit" class="btn-submit">Crear</button>
+    <a href="@Url.Action("Index")" class="btn btn-crear" style="background-color: var(--azul-oscuro); margin-left:10px; padding: 6px 12px;">Cancelar</a>
+</form>
+
+@section Scripts {
+    <script>
+        (function () {
+            const input = document.getElementById('categoriaInput');
+            const list = document.getElementById('categoriaList');
+            const hiddenId = document.getElementById('IdCategoria');
+            const form = document.getElementById('formCrearProducto');
+            let categoriasActuales = [];
+
+            async function buscarCategorias(term) {
+                try {
+                    const url = '@Url.Action("BuscarCategorias", "Productos")' + '?term=' + encodeURIComponent(term);
+                    const response = await fetch(url);
+                    if (!response.ok) throw new Error('Error en la respuesta');
+                    const data = await response.json();
+                    categoriasActuales = data;
+                    mostrarListaCategorias(data);
+                } catch (error) {
+                    console.error('Error buscando categorías:', error);
+                    list.innerHTML = '<div style="color:crimson; padding:8px;">Error al buscar categorías</div>';
+                    list.style.display = 'block';
+                }
+            }
+
+            function mostrarListaCategorias(categorias) {
+                if (!categorias || categorias.length === 0) {
+                    list.innerHTML = '<div>No hay categorías</div>';
+                    list.style.display = 'block';
+                    return;
+                }
+
+                list.innerHTML = categorias.map(c =>
+                    `<div data-id="${c.id}">${c.nombre}</div>`
+                ).join('');
+                list.style.display = 'block';
+
+                list.querySelectorAll('div').forEach(div => {
+                    div.addEventListener('click', () => {
+                        input.value = div.textContent;
+                        hiddenId.value = div.getAttribute('data-id');
+                        list.style.display = 'none';
+                    });
+                });
+            }
+
+            input.addEventListener('input', () => {
+                const term = input.value.trim();
+                hiddenId.value = '';
+                if (term.length === 0) {
+                    list.style.display = 'none';
+                    return;
+                }
+                buscarCategorias(term);
+            });
+
+            input.addEventListener('focus', () => {
+                if (input.value.trim() === '') {
+                    buscarCategorias('');
+                }
+            });
+
+            input.addEventListener('blur', () => {
+                setTimeout(() => {
+                    const valor = input.value.trim().toLowerCase();
+                    if (!valor) {
+                        input.value = '';
+                        hiddenId.value = '';
+                        list.style.display = 'none';
+                        return;
+                    }
+                    const cat = categoriasActuales.find(c => c.nombre.trim().toLowerCase() === valor);
+                    if (cat) {
+                        input.value = cat.nombre;
+                        hiddenId.value = cat.id;
+                    } else {
+                        input.value = '';
+                        hiddenId.value = '';
+                    }
+                    list.style.display = 'none';
+                }, 150);
+            });
+
+        })();
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+}

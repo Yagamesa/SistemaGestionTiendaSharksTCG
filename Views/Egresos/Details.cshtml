@@ -1,0 +1,45 @@
+﻿@model ProyectoMDGSharksWeb.Models.Egreso
+
+@{
+    ViewBag.Title = "Detalle del Egreso";
+}
+
+<h1>Detalle del Egreso</h1>
+
+<div class="detalle-egreso">
+    <p><strong>Tipo de Egreso:</strong> @Model.IdTipoEgresoNavigation.Nombre</p>
+    <p><strong>Usuario:</strong> @Model.IdUsuarioNavigation.Nombre</p>
+    <p><strong>Monto:</strong> @Model.Monto.ToString("F2") Bs</p>
+    <p><strong>Fecha:</strong> @Model.Fecha?.ToString("yyyy-MM-dd")</p>
+    <p><strong>Descripción:</strong> @Model.Descripcion</p>
+</div>
+
+<a href="@Url.Action("Index")" class="btn btn-volver">Volver al Listado</a>
+
+@section Styles {
+    <style>
+        h1 {
+            font-weight: bold;
+            color: #0B3D91;
+            margin-bottom: 20px;
+        }
+
+        .detalle-egreso p {
+            font-size: 16px;
+            margin-bottom: 12px;
+        }
+
+        .btn-volver {
+            background-color: #17a2b8;
+            padding: 10px 16px;
+            color: white;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+        }
+
+            .btn-volver:hover {
+                background-color: #138496;
+            }
+    </style>
+}

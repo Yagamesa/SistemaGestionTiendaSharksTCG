@@ -1,0 +1,121 @@
+﻿@{
+    ViewBag.Title = "Registrar Usuario";
+    var roles = ViewBag.Roles as List<ProyectoMDGSharksWeb.Models.Rol>;
+    int? rolIdPorDefecto = roles?.Count == 1 ? roles[0].Id : null;
+}
+
+<h1>Registrar Nuevo Usuario</h1>
+
+<form asp-action="Create" method="post">
+    <div class="input-wrapper">
+        <label>Nombre</label>
+        <input type="text" name="nombre" id="nombre" class="input-text" required oninput="generarUsuario()" />
+    </div>
+
+    <div class="input-wrapper">
+        <label>Apellido Paterno</label>
+        <input type="text" name="apellidoPaterno" id="apellidoPaterno" class="input-text" required oninput="generarUsuario()" />
+    </div>
+
+    <div class="input-wrapper">
+        <label>Apellido Materno</label>
+        <input type="text" name="apellidoMaterno" id="apellidoMaterno" class="input-text" oninput="generarUsuario()" />
+    </div>
+
+    @if (rolIdPorDefecto.HasValue)
+    {
+        <input type="hidden" name="idRol" value="@rolIdPorDefecto.Value" />
+        <div class="input-wrapper">
+            <label>Rol</label>
+            <input type="text" class="input-text" value="@roles[0].Nombre" readonly disabled />
+        </div>
+    }
+    else
+    {
+        <div class="input-wrapper">
+            <label>Rol</label>
+            <select name="idRol" class="input-text" required>
+                <option value="">Seleccione un rol</option>
+                @foreach (var rol in roles)
+                {
+                    <option value="@rol.Id">@rol.Nombre</option>
+                }
+            </select>
+        </div>
+    }
+
+    <div class="input-wrapper">
+        <label>Usuario</label>
+        <input type="text" name="email" id="email" class="input-text" readonly required />
+    </div>
+
+    <div class="input-wrapper">
+        <label>Contraseña</label>
+        <input type="password" name="password" id="password" class="input-text" required />
+    </div>
+
+    <div class="input-wrapper">
+        <label>Confirmar Contraseña</label>
+        <input type="password" name="confirmarPassword" id="confirmarPassword" class="input-text" required />
+    </div>
+
+    <button type="submit" class="btn-nuevo">Guardar Usuario</button>
+</form>
+
+@section Scripts {
+    <script>
+        function generarUsuario() {
+            const nombre = document.getElementById("nombre").value.trim().toLowerCase();
+            const apePat = document.getElementById("apellidoPaterno").value.trim().toLowerCase();
+            if (nombre && apePat) {
+                const base = nombre + "." + apePat;
+                fetch(`/Users/VerificarUsuario?baseUsuario=${base}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById("email").value = data;
+                    });
+            }
+        }
+    </script>
+}
+
+<style>
+    .input-wrapper {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+        color: #0B3D91;
+    }
+
+    .input-text {
+        width: 100%;
+        padding: 8px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        box-sizing: border-box;
+    }
+
+    .error-msg {
+        color: red;
+        font-size: 0.875rem;
+    }
+
+    .btn-nuevo {
+        background-color: #0B3D91;
+        color: white;
+        padding: 10px 16px;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #0053ba;
+        }
+</style>

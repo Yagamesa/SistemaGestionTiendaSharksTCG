@@ -1,0 +1,134 @@
+﻿@model IEnumerable<ProyectoMDGSharksWeb.Models.CodigoTcg>
+@{
+    ViewBag.Title = "Listado de Códigos TCG";
+    var currentPage = ViewBag.CurrentPage as int? ?? 1;
+    var totalPages = ViewBag.TotalPages as int? ?? 1;
+    var search = ViewBag.Search as string ?? "";
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #0B3D91;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        border-bottom: 1px solid #ddd;
+        padding: 12px;
+        text-align: left;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .search-bar {
+        margin-bottom: 20px;
+        display: flex;
+        gap: 10px;
+    }
+
+        .search-bar input[type="text"] {
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 300px;
+        }
+
+        .search-bar button {
+            background-color: #00bfff;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+            .search-bar button:hover {
+                background-color: #005f99;
+            }
+
+    .pagination {
+        margin-top: 20px;
+        display: flex;
+        justify-content: center;
+        gap: 5px;
+    }
+
+        .pagination a, .pagination span {
+            padding: 6px 12px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            text-decoration: none;
+            color: #0B3D91;
+            font-weight: bold;
+        }
+
+        .pagination .active {
+            background-color: #0B3D91;
+            color: white;
+            pointer-events: none;
+        }
+</style>
+
+<h1>Listado de Códigos TCG</h1>
+
+<form asp-action="Index" method="get" class="search-bar">
+    <input type="text" name="search" value="@search" placeholder="Buscar por nombre del cliente..." />
+    <button type="submit">Buscar</button>
+</form>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Cliente</th>
+            <th>Juego</th>
+            <th>Código</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.Id</td>
+                <td>@(item.IdClienteNavigation.Nombre + " " + item.IdClienteNavigation.ApellidoPaterno + " " + item.IdClienteNavigation.ApellidoMaterno)</td>
+                <td>@item.Juego</td>
+                <td>@item.Codigo</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id" style="color:#00bfff; font-weight:bold">Editar</a>
+                    |
+                    <a asp-action="Details" asp-route-id="@item.Id" style="color:#0B3D91; font-weight:bold">Detalles</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="pagination">
+    @for (int i = 1; i <= totalPages; i++)
+    {
+        if (i == currentPage)
+        {
+            <span class="active">@i</span>
+        }
+        else
+        {
+            <a href="@Url.Action("Index", new { page = i, search = search })">@i</a>
+        }
+    }
+</div>

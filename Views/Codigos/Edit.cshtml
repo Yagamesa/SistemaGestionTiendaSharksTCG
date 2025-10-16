@@ -1,0 +1,91 @@
+﻿@model ProyectoMDGSharksWeb.Models.CodigoTcg
+
+@{
+    ViewBag.Title = "Editar Código TCG";
+}
+
+<h1>Editar Código TCG</h1>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <input type="hidden" asp-for="IdCliente" />
+
+    <div>
+        <label>Cliente</label>
+        <input type="text" value="@ViewBag.ClienteNombre" readonly />
+    </div>
+
+    <div>
+        <label asp-for="Juego"></label>
+        <input asp-for="Juego" />
+        <span asp-validation-for="Juego" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label asp-for="Codigo"></label>
+        <input asp-for="Codigo" />
+        <span asp-validation-for="Codigo" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn-submit">Guardar Cambios</button>
+    <a href="@Url.Action("Index", "Codigos")" class="btn-cancelar">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    input[type="text"], input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .text-danger {
+        color: crimson;
+    }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+</style>

@@ -1,0 +1,62 @@
+﻿@model ProyectoMDGSharksWeb.Models.Cliente
+@inject Microsoft.AspNetCore.Antiforgery.IAntiforgery Antiforgery
+
+@{
+    ViewBag.Title = "Usar SharkCoins";
+}
+
+<h1>Usar SharkCoins</h1>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    Swal.fire({
+        title: 'Usar SharkCoins',
+        html: `
+            <p>Cliente: <strong>@Model.Nombre @Model.ApellidoPaterno @Model.ApellidoMaterno</strong></p>
+            <p>SharkCoins Disponibles: <strong>@Model.SharkCoins?.ToString("F2")</strong></p>
+            <input id="cantidad" type="number" min="0" placeholder="Ingrese cantidad" class="swal2-input" />
+        `,
+        showCancelButton: true,
+        confirmButtonText: 'Descontar',
+        cancelButtonText: 'Cancelar',
+        preConfirm: () => {
+            const cantidad = parseFloat(document.getElementById('cantidad').value);
+            if (isNaN(cantidad) || cantidad <= 0) {
+                Swal.showValidationMessage('Ingrese una cantidad válida mayor a cero');
+            } else if (cantidad > @Model.SharkCoins) {
+                Swal.showValidationMessage('No tiene suficientes SharkCoins');
+            } else {
+                return cantidad;
+            }
+        }
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch('@Url.Action("DescontarSharkcoins", "Clientes", new { id = Model.Id })', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': '@@(Antiforgery.GetTokens(HttpContext).RequestToken)'
+                },
+                body: JSON.stringify({
+                    SharkcoinsDescontar: result.value
+                })
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Error al descontar SharkCoins');
+                return response.json();
+            })
+            .then(data => {
+                Swal.fire('¡Éxito!', data.mensaje, 'success').then(() => {
+                    window.location.href = '@Url.Action("Index", "Clientes")';
+                });
+            })
+            .catch(error => {
+                Swal.fire('Error', error.message, 'error');
+            });
+        } else {
+            window.location.href = '@Url.Action("Index", "Clientes")';
+        }
+    });
+</script>
+

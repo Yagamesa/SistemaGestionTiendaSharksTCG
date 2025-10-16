@@ -1,0 +1,442 @@
+﻿@model ProyectoMDGSharksWeb.Controllers.GanadoresTorneoController.GanadoresViewModel
+@{
+    ViewBag.Title = "Registrar Ganadores";
+    var torneo = Model.Torneo;
+    var participantes = Model.Participantes;
+}
+
+<style>
+    .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+    }
+
+    .modal-container {
+        background: white;
+        border-radius: 8px;
+        width: 90%;
+        max-width: 1200px;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        display: flex;
+        flex-direction: column;
+    }
+
+    .modal-header {
+        background-color: #0B3D91;
+        color: white;
+        padding: 20px;
+        border-bottom: 2px solid #001f3f;
+    }
+
+        .modal-header h1 {
+            margin: 0;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .modal-header p {
+            margin: 5px 0 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+    .modal-body {
+        padding: 20px;
+        overflow-y: auto;
+        flex: 1;
+    }
+
+    .info-torneo {
+        background-color: #f0f8ff;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+        border-left: 4px solid #0B3D91;
+    }
+
+        .info-torneo p {
+            margin: 5px 0;
+            font-weight: 600;
+            color: #001f3f;
+        }
+
+    .tabla-ganadores {
+        width: 100%;
+        border-collapse: collapse;
+        margin-bottom: 20px;
+    }
+
+        .tabla-ganadores thead {
+            background-color: #0B3D91;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .tabla-ganadores th {
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        .tabla-ganadores tbody tr {
+            border-bottom: 1px solid #ddd;
+            transition: background-color 0.2s;
+        }
+
+            .tabla-ganadores tbody tr:hover {
+                background-color: #e6f7ff;
+            }
+
+        .tabla-ganadores td {
+            padding: 12px;
+            vertical-align: middle;
+        }
+
+    .input-campo {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 14px;
+    }
+
+        .input-campo:focus {
+            outline: none;
+            border-color: #00bfff;
+            box-shadow: 0 0 5px rgba(0, 191, 255, 0.3);
+        }
+
+        .input-campo.error {
+            border-color: #dc3545;
+        }
+
+    .error-message {
+        color: #dc3545;
+        font-size: 12px;
+        margin-top: 3px;
+        display: none;
+    }
+
+    .modal-footer {
+        padding: 15px 20px;
+        background-color: #f8f9fa;
+        border-top: 1px solid #ddd;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+    }
+
+    .btn {
+        padding: 10px 20px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 14px;
+        transition: background-color 0.3s;
+    }
+
+    .btn-guardar {
+        background-color: #28a745;
+        color: white;
+    }
+
+        .btn-guardar:hover {
+            background-color: #218838;
+        }
+
+        .btn-guardar:disabled {
+            background-color: #6c757d;
+            cursor: not-allowed;
+        }
+
+    .btn-cancelar {
+        background-color: #dc3545;
+        color: white;
+    }
+
+        .btn-cancelar:hover {
+            background-color: #c82333;
+        }
+
+    .fila-reordenando {
+        animation: reordenar 0.3s ease;
+    }
+    @@keyframes reordenar {
+        0%
+
+    {
+        opacity: 0.5;
+    }
+
+    100% {
+        opacity: 1;
+    }
+
+    }
+</style>
+
+<div class="modal-overlay" id="modalGanadores">
+    <div class="modal-container">
+        <div class="modal-header">
+            <h1>Registrar Ganadores del Torneo</h1>
+            <p>Complete la información de todos los participantes</p>
+        </div>
+
+        <div class="modal-body">
+            <div class="info-torneo">
+                <p><strong>Torneo:</strong> @torneo.Nombre</p>
+                <p><strong>Fecha:</strong> @torneo.Fecha.ToString("dd/MM/yyyy")</p>
+                <p><strong>Entrada:</strong> Bs. @torneo.Entrada.ToString("F2")</p>
+                <p><strong>Total de Participantes:</strong> @participantes.Count</p>
+            </div>
+
+            <table class="tabla-ganadores" id="tablaGanadores">
+                <thead>
+                    <tr>
+                        <th style="width: 35%">Cliente</th>
+                        <th style="width: 15%">Posición</th>
+                        <th style="width: 20%">SharkCoins</th>
+                        <th style="width: 20%">Monto Pagado (Bs)</th>
+                        <th style="width: 10%">Deuda (Bs)</th>
+                    </tr>
+                </thead>
+                <tbody id="cuerpoTabla">
+                    @foreach (var p in participantes)
+                    {
+                        <tr data-id="@p.IdCliente">
+                            <td class="nombre-cliente">@p.NombreCompleto</td>
+                            <td>
+                                <input type="text"
+                                       class="input-campo input-puesto"
+                                       placeholder="Ej: 1"
+                                       value=""
+                                       data-id="@p.IdCliente" />
+                                <div class="error-message">Posición inválida</div>
+                            </td>
+                            <td>
+                                <input type="text"
+                                       class="input-campo input-sharkcoins"
+                                       placeholder="Ej: 50 o 50.5"
+                                       value=""
+                                       data-id="@p.IdCliente" />
+                            </td>
+                            <td>
+                                <input type="text"
+                                       class="input-campo input-pago"
+                                       placeholder="Ej: 30 o 30.00"
+                                       value=""
+                                       data-id="@p.IdCliente" />
+                            </td>
+                            <td class="celda-deuda" data-id="@p.IdCliente"></td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-cancelar" onclick="cancelar()">Cancelar</button>
+            <button type="button" class="btn btn-guardar" id="btnGuardar" onclick="guardar()" disabled>Guardar Resultados</button>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const entradaTorneo = @torneo.Entrada;
+        const totalParticipantes = @participantes.Count;
+        const idTorneo = @torneo.Id;
+
+        let datosParticipantes = {};
+        document.querySelectorAll('tr[data-id]').forEach(tr => {
+            const id = parseInt(tr.getAttribute('data-id'));
+            datosParticipantes[id] = { puesto: 0, sharkcoins: 0, montoPagado: 0, completo: false };
+        });
+
+        // ====== LISTENERS ======
+        // POSICIÓN - Enteros (no sobrescribimos this.value)
+        document.querySelectorAll('.input-puesto').forEach(input => {
+            input.addEventListener('input', function () {
+                const id = parseInt(this.getAttribute('data-id'));
+                const valor = parseInt((this.value || '').replace(/[^\d]/g, '')) || 0;
+                datosParticipantes[id].puesto = valor;
+                verificarCompletitud(id);
+                validar();            // <-- solo validamos, NO reordenamos mientras escribes
+            });
+
+            // Reordenar recién cuando terminas de escribir (blur)
+            input.addEventListener('blur', function () {
+                validar();
+                safeReordenarTabla(); // <-- reordena cuando ya no estás escribiendo
+            });
+        });
+
+        // SHARKCOINS - Decimales
+        document.querySelectorAll('.input-sharkcoins').forEach(input => {
+            input.addEventListener('input', function () {
+                const id = parseInt(this.getAttribute('data-id'));
+                const valor = parseFloat((this.value || '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+                datosParticipantes[id].sharkcoins = valor;
+                verificarCompletitud(id);
+                validar(); // no reordenar aquí
+            });
+            input.addEventListener('blur', function () {
+                validar();
+                safeReordenarTabla();
+            });
+        });
+
+        // MONTO PAGADO - Decimales
+        document.querySelectorAll('.input-pago').forEach(input => {
+            input.addEventListener('input', function () {
+                const id = parseInt(this.getAttribute('data-id'));
+                const valor = parseFloat((this.value || '').replace(/[^0-9.,]/g, '').replace(',', '.')) || 0;
+                datosParticipantes[id].montoPagado = valor;
+
+                const deuda = Math.max(0, entradaTorneo - valor);
+                const celda = document.querySelector(`.celda-deuda[data-id="${id}"]`);
+                celda.textContent = (this.value && !isNaN(valor)) ? deuda.toFixed(2) : "";
+
+                verificarCompletitud(id);
+                validar(); // no reordenar aquí
+            });
+            input.addEventListener('blur', function () {
+                validar();
+                safeReordenarTabla();
+            });
+        });
+
+        // ====== LÓGICA ======
+        function verificarCompletitud(id) {
+            const d = datosParticipantes[id];
+            d.completo = d.puesto > 0 && d.puesto <= totalParticipantes;
+        }
+
+        function validar() {
+            let hayError = false;
+
+            // Limpiar errores
+            document.querySelectorAll('.input-puesto').forEach(input => {
+                input.classList.remove('error');
+                input.parentElement.querySelector('.error-message').style.display = 'none';
+            });
+
+            // Validación de posiciones
+            const usados = {};
+            Object.keys(datosParticipantes).forEach(id => {
+                const d = datosParticipantes[id];
+                const inp = document.querySelector(`.input-puesto[data-id="${id}"]`);
+                if (d.puesto > 0) {
+                    if (d.puesto > totalParticipantes) {
+                        inp.classList.add('error');
+                        inp.parentElement.querySelector('.error-message').style.display = 'block';
+                        hayError = true;
+                    } else {
+                        usados[d.puesto] = (usados[d.puesto] || 0) + 1;
+                    }
+                }
+            });
+
+            // Duplicados
+            Object.keys(datosParticipantes).forEach(id => {
+                const d = datosParticipantes[id];
+                if (d.puesto > 0 && usados[d.puesto] > 1) {
+                    const inp = document.querySelector(`.input-puesto[data-id="${id}"]`);
+                    inp.classList.add('error');
+                    inp.parentElement.querySelector('.error-message').style.display = 'block';
+                    hayError = true;
+                }
+            });
+
+            const todosCompletos = Object.values(datosParticipantes).every(d => d.completo);
+            document.getElementById('btnGuardar').disabled = !todosCompletos || hayError;
+            return !hayError && todosCompletos;
+        }
+
+        // Reordenado "seguro": no reordena si estás escribiendo
+        function safeReordenarTabla() {
+            const active = document.activeElement;
+            const typing =
+                active &&
+                (active.classList?.contains('input-puesto') ||
+                 active.classList?.contains('input-sharkcoins') ||
+                 active.classList?.contains('input-pago'));
+
+            if (typing) return; // <-- evita perder foco
+
+            const tbody = document.getElementById('cuerpoTabla');
+            const filas = Array.from(tbody.querySelectorAll('tr'));
+            filas.sort((a, b) => {
+                const idA = parseInt(a.getAttribute('data-id'));
+                const idB = parseInt(b.getAttribute('data-id'));
+                const pa = datosParticipantes[idA].puesto || Number.MAX_SAFE_INTEGER;
+                const pb = datosParticipantes[idB].puesto || Number.MAX_SAFE_INTEGER;
+                return pa - pb;
+            });
+            filas.forEach(f => {
+                f.classList.add('fila-reordenando');
+                tbody.appendChild(f);
+                setTimeout(() => f.classList.remove('fila-reordenando'), 300);
+            });
+        }
+
+        function guardar() {
+            if (!confirm('¿Está seguro que desea guardar estos resultados? Esta acción completará el torneo.')) return;
+
+            // Validar y hacer un reordenado final (ya no estás escribiendo)
+            const ok = validar();
+            safeReordenarTabla();
+
+            if (!ok) {
+                alert('Revise posiciones: no pueden repetirse y deben estar dentro de rango.');
+                return;
+            }
+
+            const ganadores = Object.keys(datosParticipantes).map(id => ({
+                IdCliente: parseInt(id),
+                Puesto: datosParticipantes[id].puesto,
+                PremioSharkcoins: datosParticipantes[id].sharkcoins,
+                MontoPagado: datosParticipantes[id].montoPagado
+            }));
+
+            const request = { IdTorneo: idTorneo, Ganadores: ganadores };
+
+            fetch('@Url.Action("Guardar", "GanadoresTorneo")', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(request)
+            })
+            .then(r => r.json())
+            .then(data => {
+                if (data.success) {
+                    alert('Resultados guardados exitosamente');
+                    window.location.href = '@Url.Action("Index", "Home")';
+                } else {
+                    alert('Error al guardar los resultados');
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                alert('Error al guardar los resultados');
+            });
+        }
+
+        function cancelar() {
+            if (!confirm('¿Está seguro que desea cancelar? Se perderán todos los datos ingresados.')) return;
+            window.location.href = '@Url.Action("Index", "Torneos")';
+        }
+    </script>
+}

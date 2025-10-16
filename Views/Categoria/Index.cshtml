@@ -1,0 +1,133 @@
+﻿@model IEnumerable<ProyectoMDGSharksWeb.Models.Categoria>
+
+@{
+    ViewBag.Title = "Lista de Categorías";
+}
+
+<style>
+    :root {
+        --azul-oscuro: #0B3D91;
+        --celeste: #00BFFF;
+        --blanco: #FFFFFF;
+        --negro: #000000;
+    }
+
+    h1 {
+        font-weight: 700;
+        color: var(--azul-oscuro);
+        user-select: none;
+    }
+
+    a.btn {
+        display: inline-block;
+        padding: 6px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+    }
+
+    a.btn-crear {
+        background-color: var(--celeste);
+        color: var(--blanco);
+        margin-bottom: 20px;
+    }
+
+        a.btn-crear:hover {
+            background-color: var(--azul-oscuro);
+        }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+        padding: 12px 15px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    th {
+        background-color: var(--azul-oscuro);
+        color: var(--blanco);
+        user-select: none;
+    }
+
+    tr:hover {
+        background-color: var(--celeste);
+        color: var(--azul-oscuro);
+    }
+
+    a.accion-link {
+        color: var(--azul-oscuro);
+        font-weight: 600;
+        margin-right: 15px;
+    }
+
+        a.accion-link:hover {
+            text-decoration: underline;
+        }
+
+    .error-msg {
+        color: crimson;
+        font-weight: 700;
+        margin-bottom: 15px;
+    }
+
+    /* Botones dentro de formulario para eliminar */
+    button.btn-eliminar {
+        background: none;
+        border: none;
+        color: crimson;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 0;
+        font-family: inherit;
+        font-size: 1rem;
+    }
+
+        button.btn-eliminar:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<h1>Lista de Categorías</h1>
+
+@if (TempData["Error"] != null)
+{
+    <div class="error-msg">@TempData["Error"]</div>
+}
+
+<a href="@Url.Action("Create")" class="btn btn-crear">+ Crear Nueva Categoría</a>
+
+<table aria-label="Tabla de categorías">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Descripción</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var cat in Model)
+        {
+            <tr>
+                <td>@cat.Id</td>
+                <td>@cat.Nombre</td>
+                <td>@cat.Descripcion</td>
+                <td>
+                    <a href="@Url.Action("Edit", new { id = cat.Id })" class="accion-link">Editar</a>
+                    <form asp-action="DeleteConfirmed" asp-route-id="@cat.Id" method="post" style="display:inline;"
+                          onsubmit="return confirm('¿Estás seguro que deseas eliminar esta categoría?');">
+                        @Html.AntiForgeryToken()
+                        
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,364 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>@ViewBag.Title - SharksTCG</title>
+
+    <style>
+        :root {
+            --azul-oscuro: #0B3D91;
+            --celeste: #00BFFF;
+            --blanco: #FFFFFF;
+            --negro: #000000;
+        }
+
+        body {
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--blanco);
+            color: var(--negro);
+        }
+
+        a {
+            color: var(--celeste);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        a:hover, a:focus {
+            color: var(--azul-oscuro);
+            text-decoration: underline;
+        }
+
+        header nav.navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: var(--azul-oscuro);
+            color: var(--blanco);
+            padding: 12px 24px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .navbar-brand {
+            font-size: 1.8rem;
+            font-weight: 700;
+            user-select: none;
+        }
+
+        .navbar-user {
+            font-size: 0.9rem;
+        }
+
+        .container {
+            display: flex;
+            min-height: calc(100vh - 56px - 40px);
+            background-color: var(--blanco);
+        }
+
+        aside.sidebar {
+            width: 220px;
+            background-color: var(--azul-oscuro);
+            padding: 28px 20px;
+            color: var(--blanco);
+            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+            user-select: none;
+        }
+
+        .menu-modulos {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .menu-item {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .menu-item > a {
+            color: var(--blanco);
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        .menu-item > a:hover,
+        .menu-item > a:focus {
+            background-color: var(--celeste);
+            color: var(--azul-oscuro);
+            outline: none;
+        }
+
+        .submenu {
+            list-style: none;
+            padding-left: 15px;
+            margin-top: 8px;
+            display: none;
+        }
+
+        .menu-item:hover .submenu,
+        .menu-item:focus-within .submenu {
+            display: block;
+        }
+
+        .submenu li a {
+            font-size: 0.95rem;
+            color: var(--blanco);
+            padding: 4px 12px;
+            display: block;
+            border-radius: 6px;
+            transition: background-color 0.3s ease;
+        }
+
+        .submenu li a:hover,
+        .submenu li a:focus {
+            background-color: var(--celeste);
+            color: var(--azul-oscuro);
+            outline: none;
+        }
+
+        main.main-content {
+            flex-grow: 1;
+            padding: 30px 40px;
+            background-color: var(--blanco);
+            overflow-y: auto;
+        }
+
+        main.main-content h1 {
+            font-weight: 700;
+            color: var(--azul-oscuro);
+            margin-bottom: 20px;
+            user-select: none;
+        }
+
+        footer {
+            text-align: center;
+            padding: 14px 0;
+            background-color: var(--azul-oscuro);
+            color: var(--blanco);
+            font-size: 0.9rem;
+            user-select: none;
+            box-shadow: 0 -2px 4px rgba(0,0,0,0.15);
+        }
+
+        main.main-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        main.main-content::-webkit-scrollbar-thumb {
+            background-color: var(--celeste);
+            border-radius: 4px;
+        }
+
+        .logout-button {
+            background: none;
+            border: none;
+            color: var(--blanco);
+            cursor: pointer;
+            font-size: 0.9rem;
+            padding: 0;
+            margin-left: 10px;
+            text-decoration: underline;
+        }
+
+        .logout-button:hover {
+            color: var(--celeste);
+        }
+    </style>
+
+    @RenderSection("Styles", required: false)
+</head>
+<body>
+    <header>
+        <nav class="navbar" role="navigation" aria-label="Menú principal">
+            <div class="navbar-brand" tabindex="0">
+                SharksTCG
+            </div>
+
+            <div class="navbar-user" aria-live="polite">
+                @if (User.Identity.IsAuthenticated)
+                {
+                    <span>Hola, @User.Identity.Name</span>
+                    <form method="post" asp-controller="Auth" asp-action="Logout" style="display:inline;">
+                        @Html.AntiForgeryToken()
+                        <button type="submit" class="logout-button">Cerrar sesión</button>
+                    </form>
+                }
+                else
+                {
+                    <a href="@Url.Action("Login", "Auth")" style="color: var(--blanco);">Iniciar sesión</a>
+                }
+            </div>
+        </nav>
+    </header>
+
+    <div class="container">
+        @if (User.Identity.IsAuthenticated)
+        {
+            <aside class="sidebar" role="navigation" aria-label="Menú lateral">
+                <ul class="menu-modulos">
+
+                    @{
+                        var rolClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role);
+                        var rolNombre = rolClaim?.Value ?? "";
+                    }
+
+
+
+
+                    @if (rolNombre == "Administrador" || rolNombre == "Encargado")
+                    {
+                        <li class="menu-item" tabindex="0">
+                            <a href="#">Roles</a>
+                            <ul class="submenu" aria-label="Opciones Roles">
+                                <li><a href="@Url.Action("Create", "Roles")">Crear Rol</a></li>
+                                <li><a href="@Url.Action("Index", "Roles")">Ver Roles</a></li>
+                            </ul>
+                        </li>
+                    }
+
+                    @if (rolNombre == "Administrador" || rolNombre == "Encargado") 
+                    {
+                        <li class="menu-item" tabindex="0">
+                            <a href="#">Usuarios</a>
+                            <ul class="submenu" aria-label="Opciones Usuarios">
+                                <li><a href="@Url.Action("Create", "Users")">Agregar Usuario</a></li>
+                                <li><a href="@Url.Action("Index", "Users")">Ver Usuarios</a></li>
+                            </ul>
+                        </li>
+                    }
+                @using System.Security.Claims
+                    @{
+                        var rolUsuario = User.FindFirst(ClaimTypes.Role)?.Value ?? "";
+                    }
+
+                    @if (User.Identity.IsAuthenticated && (rolUsuario == "Administrador" || rolUsuario == "Encargado"))
+                    {
+                        <li class="menu-item">
+                            <a href="@Url.Action("Index", "Permisos")">
+                                <i class="fas fa-lock"></i> Panel de Permisos
+                            </a>
+                        </li>
+                    }
+
+                    <li class="menu-item" tabindex="0">
+                        <a href="#">
+                            <a href="#">Productos</a>
+                        <ul class="submenu" aria-label="Opciones Productos">
+                            <li><a href="@Url.Action("Create", "Productos")">Agregar Producto</a></li>
+                            <li><a href="@Url.Action("Index", "Productos")">Ver Peroductos</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item" tabindex="0">
+                        <a href="#">Categorías</a>
+                        <ul class="submenu" aria-label="Opciones Categorías">
+                            <li><a href="@Url.Action("Create", "Categoria")">Agregar Categorias</a></li>
+                            <li><a href="@Url.Action("Index", "Categoria")">Ver Categorias</a></li>
+                        </ul>
+                    </li>
+                   
+                    <li class="menu-item" tabindex="0">
+                        <a href="#">Ventas</a>
+                        <ul class="submenu" aria-label="Opciones Ventas">
+                            <li><a href="@Url.Action("Create", "Ventas")">Nueva Venta</a></li>
+                            <li><a href="@Url.Action("Create", "VentasAcumulativas")">Ventas Acumulativas</a></li>
+                            <li><a href="@Url.Action("Index", "Ventas")">Historial Ventas</a></li>
+                        </ul>
+                    </li>
+
+
+                      
+                        <li class="menu-item" tabindex="0">
+                            <a href="#">Egresos</a>
+                            <ul class="submenu" aria-label="Opciones Egresos">
+                                <li><a href="@Url.Action("Index", "Egresos")">Ver Egresos</a></li>
+                                <li><a href="@Url.Action("Create", "Egresos")">Nuevo Egreso</a></li>
+                                <li><a href="@Url.Action("IndexTipos", "Egresos")">Tipos de Egresos</a></li>
+                            </ul>
+                        </li>
+                    
+
+
+
+                    <li class="menu-item" tabindex="0">
+                        <a href="#">Torneos</a>
+                        <ul class="submenu" aria-label="Opciones Torneos">
+                            <li><a href="@Url.Action("Create", "Torneos")">Crear Torneos</a></li>
+                            <li><a href="@Url.Action("Index", "Torneos")">Ver torneos</a></li>
+                            <li><a href="@Url.Action("Index", "GanadoresTorneo")">Ganadores de Torneo</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="menu-item" tabindex="0">
+                        <a href="#">Clientes</a>
+                        <ul class="submenu" aria-label="Opciones Clientes">
+                            <li><a href="@Url.Action("Create", "Clientes")">Agregar Cliente</a></li>
+                            <li><a href="@Url.Action("Index", "Clientes")">Listado Clientes</a></li>
+                        </ul>
+                    </li>
+                    <li class="menu-item" tabindex="0">
+                        <a href="#">CódigosTCG´S</a>
+                        <ul class="submenu" aria-label="Opciones Códigos">
+                            <li><a href="@Url.Action("Create", "Codigos")">Crear Codigo Cliente</a></li>
+                            <li><a href="@Url.Action("Index", "Codigos")">Ver Codigos</a></li>
+                        </ul>
+                    </li>
+
+
+
+
+                    @* 
+<li class="menu-item" tabindex="0">
+    <a href="#">Informes</a>
+    <ul class="submenu" aria-label="Opciones Informes">
+        <!-- Antes: <a href="@Url.Action("InformeTorneos", "Informe")"> -->
+        <li><a asp-controller="InformeTorneos" asp-action="Index">Informe de Torneos</a></li>
+        <li><a asp-controller="Informe" asp-action="Index">Informe de Ventas</a></li>
+    </ul>
+</li>
+*@
+
+
+                   
+                        
+                   
+
+
+                </ul>
+
+            </aside>
+        }
+
+        <main class="main-content" role="main" tabindex="0">
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; YGM Devs - Todos los derechos reservados</p>
+    </footer>
+
+    @RenderSection("Scripts", required: false)
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <script>
+        if (sessionStorage.getItem("acceso_denegado") === "1") {
+            Swal.fire({
+                icon: 'error',
+                title: 'Acceso Denegado',
+                text: 'No tienes permiso para realizar esta acción',
+                confirmButtonText: 'Aceptar'
+            }).then(() => {
+                sessionStorage.removeItem("acceso_denegado");
+                window.location.href = '/Home/Index';
+            });
+        }
+    </script>
+
+</body>
+</html>

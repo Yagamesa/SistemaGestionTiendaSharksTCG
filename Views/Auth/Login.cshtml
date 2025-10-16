@@ -1,0 +1,102 @@
+﻿@{
+    ViewData["Title"] = "Iniciar Sesión";
+}
+
+<style>
+    .login-container {
+        max-width: 380px;
+        margin: 80px auto;
+        padding: 36px 48px;
+        background-color: #f9f9f9;
+        border-radius: 12px;
+        box-shadow: 0 6px 18px rgba(0, 0, 0, 0.12);
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+        .login-container h2 {
+            text-align: center;
+            color: #0B3D91; /* Azul oscuro */
+            margin-bottom: 36px;
+            font-weight: 700;
+            font-size: 2rem;
+            user-select: none;
+        }
+
+    .form-group label {
+        display: block;
+        margin-bottom: 8px;
+        color: #0B3D91;
+        font-weight: 600;
+        font-size: 1.05rem;
+        user-select: none;
+    }
+
+    .form-control {
+        width: 100%;
+        border-radius: 10px;
+        padding: 12px 14px;
+        border: 1.8px solid #ccc;
+        font-size: 1.05rem;
+        transition: border-color 0.3s ease;
+        box-sizing: border-box;
+    }
+
+        .form-control:focus {
+            border-color: #00BFFF;
+            outline: none;
+            box-shadow: 0 0 6px rgba(0, 191, 255, 0.5);
+        }
+
+    .btn-primary {
+        background-color: #00BFFF;
+        border-color: #00BFFF;
+        width: 100%;
+        padding: 14px 0;
+        font-weight: 700;
+        font-size: 1.1rem;
+        border-radius: 10px;
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+        margin-top: 24px; /* <-- Aquí */
+    }
+
+        .btn-primary:hover,
+        .btn-primary:focus {
+            background-color: #0B3D91;
+            border-color: #0B3D91;
+            outline: none;
+        }
+
+    .alert-danger {
+        background-color: #f8d7da;
+        color: #721c24;
+        border-radius: 8px;
+        padding: 14px 16px;
+        margin-bottom: 28px;
+        border: 1px solid #f5c6cb;
+        font-size: 1rem;
+        user-select: none;
+    }
+</style>
+
+<div class="login-container" role="main" aria-labelledby="loginTitle">
+    <h2 id="loginTitle">Iniciar Sesión</h2>
+
+    @if (ViewBag.Error != null)
+    {
+        <div class="alert alert-danger" role="alert">@ViewBag.Error</div>
+    }
+
+    <form method="post" asp-controller="Auth" asp-action="Login" autocomplete="off" novalidate>
+        <div class="form-group mb-4">
+            <label for="email">Email</label>
+            <input type="email" name="email" class="form-control" id="email" required autocomplete="username" />
+        </div>
+        <div class="form-group mb-5">
+            <label for="password">Contraseña</label>
+            <input type="password" name="password" class="form-control" id="password" required autocomplete="current-password" />
+        </div>
+        <button type="submit" class="btn btn-primary" aria-label="Iniciar sesión">Iniciar sesión</button>
+    </form>
+</div>

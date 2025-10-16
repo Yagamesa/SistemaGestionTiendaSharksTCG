@@ -1,0 +1,74 @@
+﻿@model ProyectoMDGSharksWeb.Models.GanadoresTorneo
+
+@{
+    ViewBag.Title = "Detalles del Ganador";
+    var cliente = Model.TorneoCliente.IdClienteNavigation;
+    var torneo = Model.TorneoCliente.IdTorneoNavigation;
+}
+
+<h1>Detalles del Ganador</h1>
+
+<div>
+    <p><strong>ID Registro:</strong> @Model.Id</p>
+
+    <p>
+        <strong>Cliente:</strong>
+        @cliente.Nombre @cliente.ApellidoPaterno @cliente.ApellidoMaterno
+        (<a href="@Url.Action("Details", "Clientes", new { id = cliente.Id })" class="btn btn-submit">Ver Cliente</a>)
+    </p>
+
+    <p>
+        <strong>Torneo:</strong>
+        @torneo.Nombre - @torneo.Fecha.ToString("yyyy-MM-dd")
+        (<a href="@Url.Action("Details", "Torneos", new { id = torneo.Id })" class="btn btn-submit">Ver Torneo</a>)
+    </p>
+
+    <p><strong>Puesto:</strong> @Model.Puesto</p>
+    <p><strong>Premio en SharkCoins:</strong> @Model.PremioSharkcoins.ToString("F2") SC</p>
+</div>
+
+<a href="@Url.Action("Index", "GanadoresTorneo")" class="btn btn-cancelar">Volver</a>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    div p {
+        font-size: 16px;
+        margin: 8px 0;
+    }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-top: 20px;
+        display: inline-block;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+        padding: 6px 12px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        text-decoration: none;
+        margin-left: 8px;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+</style>

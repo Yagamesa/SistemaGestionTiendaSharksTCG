@@ -1,0 +1,114 @@
+﻿@model ProyectoMDGSharksWeb.Models.Cliente
+
+@{
+    ViewBag.Title = "Agregar Cliente";
+}
+
+<h1>Registrar Nuevo Cliente</h1>
+
+<form asp-action="Create" method="post">
+    <div>
+        <label>Nombre</label>
+        <input asp-for="Nombre" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label>Apellido Paterno</label>
+        <input asp-for="ApellidoPaterno" />
+        <span asp-validation-for="ApellidoPaterno" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label>Apellido Materno</label>
+        <input asp-for="ApellidoMaterno" />
+        <span asp-validation-for="ApellidoMaterno" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label>CI</label>
+        <input asp-for="Ci" />
+        <span asp-validation-for="Ci" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label>Celular</label>
+        <input asp-for="Celular" />
+        <span asp-validation-for="Celular" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label>SharkCoins</label>
+        <input asp-for="SharkCoins" type="number" step="0.01" min="0" />
+        <span asp-validation-for="SharkCoins" class="text-danger"></span>
+    </div>
+
+    <div>
+        <label>Deuda</label>
+        <input asp-for="Deuda" type="number" step="0.01" min="0" />
+        <span asp-validation-for="Deuda" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn-submit">Guardar</button>
+    <a href="@Url.Action("Index", "Clientes")" class="btn-cancelar">Cancelar</a>
+</form>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    input[type="text"], input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .text-danger {
+        color: crimson;
+    }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        text-decoration: none;
+        cursor: pointer;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-left: 10px;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+</style>

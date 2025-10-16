@@ -1,0 +1,253 @@
+﻿@model List<ProyectoMDGSharksWeb.Models.Producto>
+
+@{
+    ViewBag.Title = "Productos";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var search = ViewBag.Search as string ?? "";
+    var categoriaId = ViewBag.CategoriaId as int? ?? 0;
+    var categorias = ViewBag.Categorias as SelectList;
+}
+
+<h1>Listado de Productos</h1>
+
+<form method="get" class="form-busqueda">
+    <input type="text" name="search" value="@search" placeholder="Buscar por nombre..." class="form-control" />
+
+    <select name="categoriaId" class="form-control">
+        <option value="">-- Todas las Categorías --</option>
+        @foreach (var cat in categorias)
+        {
+            <option value="@cat.Value" @@(categoriaId == int.Parse(cat.Value) ? "selected" : "")>@cat.Text</option>
+        }
+    </select>
+
+    <button type="submit" class="btn btn-buscar">Buscar</button>
+
+    <a href="@Url.Action("Index", "Productos")" class="btn btn-quitar">Quitar Filtros</a>
+</form>
+
+<a href="@Url.Action("Create", "Productos")" class="btn-nuevo">+ Nuevo Producto</a>
+
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Categoría</th>
+                <th>Precio Compra</th>
+                <th>Precio Venta</th>
+                <th>Precio SharkCoins</th>
+                <th>Stock Actual</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (Model.Any())
+            {
+                foreach (var prod in Model)
+                {
+                    var stockActual = prod.Stocks?.Sum(s => s.TipoMovimiento == "Entrada" ? s.Cantidad : -s.Cantidad) ?? 0;
+                    <tr>
+                        <td>@prod.Nombre</td>
+                        <td>@prod.Descripcion</td>
+                        <td>@prod.IdCategoriaNavigation?.Nombre</td>
+                        <td>@(prod.PrecioCompra?.ToString("F2") ?? "0.00") Bs</td>
+                        <td>@(prod.PrecioVenta?.ToString("F2") ?? "0.00") Bs</td>
+                        <td>@(prod.PrecioSharkcoins?.ToString("F2") ?? "0.00")</td>
+                        <td>@stockActual</td>
+                        <td>
+                            <div class="btn-group-responsive">
+                                <a href="@Url.Action("Details", "Productos", new { id = prod.Id })" class="btn btn-ver">Ver</a>
+                                <a href="@Url.Action("Edit", "Productos", new { id = prod.Id })" class="btn btn-editar">Editar</a>
+                                <form asp-action="DeleteConfirmed" asp-route-id="@prod.Id" method="post" onsubmit="return confirm('¿Estás seguro que deseas eliminar este producto?');">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-eliminar">Eliminar</button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                }
+            }
+            else
+            {
+                <tr><td colspan="8">No hay productos registrados.</td></tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<div class="pagination">
+    @for (int i = 1; i <= totalPages; i++)
+    {
+        var queryParams = new { page = i, search = search, categoriaId = categoriaId == 0 ? (int?)null : categoriaId };
+        if (i == currentPage)
+        {
+            <span class="page current">@i</span>
+        }
+        else
+        {
+            <a class="page" href="@Url.Action("Index", queryParams)">@i</a>
+        }
+    }
+</div>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    .form-busqueda {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+
+        .form-busqueda input {
+            padding: 8px;
+            flex: 1 1 250px;
+        }
+
+    .btn-nuevo {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 16px;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        vertical-align: middle;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        font-weight: bold;
+        border-radius: 4px;
+        text-decoration: none;
+        color: white;
+        display: inline-block;
+    }
+
+    .btn-ver {
+        background-color: #17a2b8;
+    }
+
+    .btn-editar {
+        background-color: #ffc107;
+        color: black;
+    }
+
+    .btn-eliminar {
+        background-color: darkred;
+        color: whitesmoke;
+        border: none;
+    }
+
+    .btn-buscar {
+        background-color: #0B3D91;
+    }
+
+        .btn-buscar:hover {
+            background-color: #063173;
+        }
+
+    .btn-quitar {
+        background-color: #6c757d;
+    }
+
+        .btn-quitar:hover {
+            background-color: #5a6268;
+        }
+
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .page {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #0B3D91;
+        font-weight: bold;
+    }
+
+        .page.current {
+            background-color: #0B3D91;
+            color: white;
+        }
+
+        .page:hover {
+            background-color: #00bfff;
+            color: white;
+        }
+
+    .btn-group-responsive {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+        justify-content: center;
+    }
+
+    @@media (max-width: 768px) {
+        .btn-group-responsive
+
+    {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .form-busqueda {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+        .form-busqueda input {
+            width: 100%;
+        }
+
+    .btn {
+        width: 100%;
+        text-align: center;
+    }
+
+    }
+</style>

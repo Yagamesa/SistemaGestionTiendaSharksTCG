@@ -1,0 +1,83 @@
+﻿@model ProyectoMDGSharksWeb.Models.User
+
+@{
+    ViewBag.Title = "Detalles del Usuario";
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        display: block;
+    }
+
+    .detalle {
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .btn-volver {
+        padding: 10px 20px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #00bfff;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+        .btn-volver:hover {
+            background-color: #005f99;
+        }
+</style>
+
+<h1>Detalles del Usuario</h1>
+
+<div>
+    <label>ID</label>
+    <div class="detalle">@Model.Id</div>
+</div>
+
+<div>
+    <label>Nombre</label>
+    <div class="detalle">@Model.Nombre</div>
+</div>
+
+<div>
+    <label>Apellido Paterno</label>
+    <div class="detalle">@Model.ApellidoPaterno</div>
+</div>
+
+<div>
+    <label>Apellido Materno</label>
+    <div class="detalle">@Model.ApellidoMaterno</div>
+</div>
+
+<div>
+    <label>Usuario</label>
+    <div class="detalle">@Model.Email</div>
+</div>
+
+<div>
+    <label>Contraseña</label>
+    <div class="detalle">••••••••</div> <!-- Oculta por seguridad -->
+</div>
+
+<div>
+    <label>Rol</label>
+    <div class="detalle">@Model.IdRolNavigation?.Nombre</div>
+</div>
+
+<a asp-action="Index" class="btn-volver">Volver al Listado</a>

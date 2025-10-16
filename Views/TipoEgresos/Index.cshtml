@@ -1,0 +1,144 @@
+﻿@model List<ProyectoMDGSharksWeb.Models.TipoEgreso>
+@{
+    ViewBag.Title = "Tipos de Egreso";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+}
+
+<h1>Tipos de Egreso</h1>
+
+<a asp-action="CreateTipo" class="btn-nuevo">+ Nuevo Tipo de Egreso</a>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            foreach (var tipo in Model)
+            {
+                <tr>
+                    <td>@tipo.Id</td>
+                    <td>@tipo.Nombre</td>
+                    <td>
+                        <a asp-action="EditTipo" asp-route-id="@tipo.Id" class="btn btn-editar">Editar</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr>
+                <td colspan="3">No hay tipos de egreso registrados.</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<div class="pagination">
+    @for (int i = 1; i <= totalPages; i++)
+    {
+        if (i == currentPage)
+        {
+            <span class="page current">@i</span>
+        }
+        else
+        {
+            <a class="page" asp-action="IndexTipos" asp-route-page="@i">@i</a>
+        }
+    }
+</div>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    .btn-nuevo {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 16px;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        margin-right: 5px;
+        font-weight: bold;
+        border-radius: 4px;
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-editar {
+        background-color: #ffc107;
+        color: black;
+    }
+
+        .btn-editar:hover {
+            background-color: #e0a800;
+        }
+
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .page {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #0B3D91;
+        font-weight: bold;
+    }
+
+        .page.current {
+            background-color: #0B3D91;
+            color: white;
+        }
+
+        .page:hover {
+            background-color: #00bfff;
+            color: white;
+        }
+</style>

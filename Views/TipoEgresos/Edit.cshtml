@@ -1,0 +1,68 @@
+﻿@model ProyectoMDGSharksWeb.Models.TipoEgreso
+@{
+    ViewBag.Title = "Editar Tipo de Egreso";
+}
+
+<h1>Editar Tipo de Egreso</h1>
+
+<form asp-action="EditTipo" method="post">
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group">
+        <label asp-for="Nombre">Nombre del Tipo de Egreso</label>
+        <input asp-for="Nombre" class="form-control" />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn btn-guardar">Guardar Cambios</button>
+    <a asp-action="IndexTipos" class="btn btn-cancelar">Cancelar</a>
+</form>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    .form-group {
+        margin-bottom: 15px;
+    }
+
+    label {
+        font-weight: bold;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .btn {
+        padding: 8px 16px;
+        border-radius: 4px;
+        font-weight: bold;
+        text-decoration: none;
+        display: inline-block;
+        margin-right: 10px;
+        color: white;
+    }
+
+    .btn-guardar {
+        background-color: #28a745;
+    }
+
+    .btn-cancelar {
+        background-color: #6c757d;
+    }
+
+    .btn-guardar:hover {
+        background-color: #218838;
+    }
+
+    .btn-cancelar:hover {
+        background-color: #5a6268;
+    }
+</style>

@@ -1,0 +1,84 @@
+﻿@model ProyectoMDGSharksWeb.Models.Rol
+
+@{
+    ViewBag.Title = "Editar Rol";
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    input[type="text"], textarea {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .btn-submit, .btn-cancelar {
+        padding: 10px 20px;
+        margin-top: 10px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+
+    .error-msg {
+        color: red;
+        font-size: 0.9rem;
+    }
+</style>
+
+<h1>Editar Rol</h1>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div>
+        <label asp-for="Nombre">Nombre del Rol</label>
+        <input asp-for="Nombre" />
+        <span asp-validation-for="Nombre" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label asp-for="Permisos">Descripción de Permisos</label>
+        <textarea asp-for="Permisos" rows="3"></textarea>
+        <span asp-validation-for="Permisos" class="error-msg"></span>
+    </div>
+
+    <button type="submit" class="btn-submit">Guardar Cambios</button>
+    <a asp-action="Index" class="btn-cancelar">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

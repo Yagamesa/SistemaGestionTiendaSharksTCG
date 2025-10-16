@@ -1,0 +1,234 @@
+﻿@model ProyectoMDGSharksWeb.Models.Producto
+
+@{
+    ViewBag.Title = "Editar Producto";
+    var stockAjustado = ViewBag.StockAjustado ?? 0;
+}
+
+<h1>Editar Producto</h1>
+
+<form asp-action="Edit" method="post" id="formEditarProducto" novalidate>
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="input-wrapper">
+        <label asp-for="Nombre"></label>
+        <input asp-for="Nombre" />
+        <span asp-validation-for="Nombre" class="error-msg"></span>
+    </div>
+
+    <div class="input-wrapper">
+        <label asp-for="Descripcion"></label>
+        <textarea asp-for="Descripcion" rows="3"></textarea>
+        <span asp-validation-for="Descripcion" class="error-msg"></span>
+    </div>
+
+    <div class="input-wrapper">
+        <label>Categoría</label>
+        <input type="hidden" asp-for="IdCategoria" id="IdCategoria" />
+        <input type="text" id="categoriaInput" autocomplete="off" placeholder="Buscar categoría..." />
+        <div id="categoriaList"></div>
+        <span asp-validation-for="IdCategoria" class="error-msg"></span>
+    </div>
+
+    <div class="input-wrapper">
+        <label asp-for="PrecioCompra"></label>
+        <input asp-for="PrecioCompra" type="number" step="0.01" min="0" />
+        <span asp-validation-for="PrecioCompra" class="error-msg"></span>
+    </div>
+
+    <div class="input-wrapper">
+        <label asp-for="PrecioVenta"></label>
+        <input asp-for="PrecioVenta" type="number" step="0.01" min="0" />
+        <span asp-validation-for="PrecioVenta" class="error-msg"></span>
+    </div>
+
+    <div class="input-wrapper">
+        <label asp-for="PrecioSharkcoins"></label>
+        <input asp-for="PrecioSharkcoins" type="number" step="0.01" min="0" />
+        <span asp-validation-for="PrecioSharkcoins" class="error-msg"></span>
+    </div>
+
+    <div class="input-wrapper">
+        <label>Stock</label>
+        <input type="number" name="stockAjustado" value="@stockAjustado" step="1" />
+        <span class="error-msg">(*) Si modificas este valor, se registrará como ajuste de stock.</span>
+    </div>
+
+    <button type="submit" class="btn-submit">Guardar Cambios</button>
+    <a href="@Url.Action("Index")" class="btn btn-crear" style="background-color: var(--azul-oscuro); margin-left:10px; padding: 6px 12px;">Cancelar</a>
+</form>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    .input-wrapper {
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    input[type="text"],
+    input[type="number"],
+    textarea {
+        width: 100%;
+        padding: 8px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        box-sizing: border-box;
+    }
+
+    label {
+        font-weight: bold;
+        margin-bottom: 5px;
+        display: block;
+    }
+
+    .error-msg {
+        color: red;
+        font-size: 0.875rem;
+    }
+
+    #categoriaList {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        width: 100%;
+        background: white;
+        border: 1px solid #ccc;
+        border-top: none;
+        max-height: 200px;
+        overflow-y: auto;
+        z-index: 1000;
+        display: none;
+    }
+
+        #categoriaList div {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+            #categoriaList div:hover {
+                background-color: #f0f0f0;
+            }
+
+    .btn-submit {
+        background-color: var(--celeste);
+        color: white;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .btn-submit:hover {
+            background-color: var(--azul-oscuro);
+        }
+</style>
+
+@section Scripts {
+    <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-3.6.0.min.js"></script>
+    <script>
+        $(function () {
+            const $input = $('#categoriaInput');
+            const $list = $('#categoriaList');
+            const $hiddenId = $('#IdCategoria');
+            let categoriasActuales = [];
+
+            function buscarCategorias(term) {
+                $.ajax({
+                    url: '@Url.Action("BuscarCategorias", "Productos")',
+                    data: { term: term },
+                    success: function (data) {
+                        categoriasActuales = data;
+                        $list.empty();
+                        if (!data || data.length === 0) {
+                            $list.append('<div>No hay categorías</div>').show();
+                            return;
+                        }
+
+                        data.forEach(c => {
+                            const $div = $('<div>').text(c.nombre).attr('data-id', c.id);
+                            $list.append($div);
+                        });
+
+                        $list.show();
+                    }
+                });
+            }
+
+            $input.on('input', function () {
+                const term = $(this).val().trim();
+                $hiddenId.val('');
+                if (term.length === 0) {
+                    $list.hide();
+                    return;
+                }
+                buscarCategorias(term);
+            });
+
+            $input.on('blur', function () {
+                setTimeout(function () {
+                    const valor = $input.val().trim().toLowerCase();
+                    if (!valor) {
+                        $input.val('');
+                        $hiddenId.val('');
+                        $list.hide();
+                        return;
+                    }
+
+                    const cat = categoriasActuales.find(c => c.nombre.trim().toLowerCase() === valor);
+                    if (cat) {
+                        $input.val(cat.nombre);
+                        $hiddenId.val(cat.id);
+                    } else {
+                        $input.val('');
+                        $hiddenId.val('');
+                    }
+                    $list.hide();
+                }, 150);
+            });
+
+            $list.on('click', 'div', function () {
+                const nombre = $(this).text();
+                const id = $(this).data('id');
+                $input.val(nombre);
+                $hiddenId.val(id);
+                $list.hide();
+            });
+
+        @if (Model?.IdCategoria > 0)
+        {
+            <text>
+                        $.ajax({
+                            url: '@Url.Action("BuscarCategorias", "Productos")',
+                            data: { term: '' },
+                            success: function (data) {
+                                const cat = data.find(c => c.id === @Model.IdCategoria);
+                                if (cat) {
+                                    $input.val(cat.nombre);
+                                    $hiddenId.val(cat.id);
+                                }
+                            }
+                        });
+            </text>
+        }
+
+            $('#formEditarProducto').on('submit', function (e) {
+                if (!$hiddenId.val()) {
+                    e.preventDefault();
+                    alert('Por favor, seleccione una categoría válida de la lista.');
+                    $input.focus();
+                }
+            });
+        });
+    </script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/3.2.12/jquery.validate.unobtrusive.min.js"></script>
+}

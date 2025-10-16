@@ -1,0 +1,190 @@
+﻿@model List<ProyectoMDGSharksWeb.Models.Permiso>
+@using ProyectoMDGSharksWeb.Models
+@{
+    ViewBag.Title = "Panel de Permisos";
+    var roles = ViewBag.Roles as List<Rol>;
+    var accionesPorModulo = ViewBag.AccionesPorModulo as Dictionary<string, List<string>>;
+    int? rolSeleccionado = ViewBag.RolSeleccionado as int?;
+    string rolActual = ViewBag.RolActual as string;
+    var rolNombreSeleccionado = roles?.FirstOrDefault(r => r.Id == rolSeleccionado)?.Nombre ?? "";
+}
+
+<h1>Panel de Permisos</h1>
+
+<form method="get" asp-action="Index" asp-controller="Permisos" class="form-select-rol">
+    <label for="rol">Seleccionar Rol:</label>
+    <select name="rol" id="rol" onchange="this.form.submit()" class="combo-rol">
+        <option value="">-- Seleccione un Rol --</option>
+        @foreach (var rol in roles)
+        {
+            <option value="@rol.Id" @@(rol.Id == rolSeleccionado ? "selected" : "")>@rol.Nombre</option>
+        }
+    </select>
+</form>
+
+@if (!string.IsNullOrEmpty(rolNombreSeleccionado))
+{
+    <h3>Permisos asignados para: <span class="rol-seleccionado">@rolNombreSeleccionado</span></h3>
+}
+
+@if (rolSeleccionado != null && accionesPorModulo != null && accionesPorModulo.Any())
+{
+    <form asp-action="Guardar" method="post" onsubmit="return mostrarMensaje();">
+        <input type="hidden" name="idRol" value="@rolSeleccionado" />
+
+        <table class="tabla-permisos">
+            <thead>
+                <tr>
+                    <th>Módulo</th>
+                    @foreach (var accion in accionesPorModulo.SelectMany(x => x.Value).Distinct())
+                    {
+                        <th>@accion</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var modulo in accionesPorModulo.Keys)
+                {
+                    <tr>
+                        <td>@modulo</td>
+                        @foreach (var accion in accionesPorModulo.SelectMany(x => x.Value).Distinct())
+                        {
+                            var permiso = Model.FirstOrDefault(p => p.Modulo == modulo && p.Accion == accion);
+                            var permitido = permiso != null && permiso.Permitido;
+                            <td>
+                                <label class="switch">
+                                    <input type="checkbox" name="permisos" value="@modulo|@accion" @(permitido ? "checked" : "") />
+                                    <span class="slider"></span>
+                                </label>
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+    </form>
+}
+
+<div id="mensajeConfirmacion" class="mensaje-confirmacion">Permisos guardados correctamente.</div>
+
+<style>
+    .form-select-rol {
+        margin-bottom: 20px;
+    }
+
+    .combo-rol {
+        padding: 8px;
+        font-size: 1rem;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+        background-color: #f8f8f8;
+        min-width: 200px;
+    }
+
+    .rol-seleccionado {
+        font-weight: bold;
+        color: #0B3D91;
+    }
+
+    .tabla-permisos {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .tabla-permisos th, .tabla-permisos td {
+        border: 1px solid #ccc;
+        padding: 10px;
+        text-align: center;
+    }
+
+    .tabla-permisos th {
+        background-color: #f0f0f0;
+    }
+
+    .btn-guardar {
+        margin-top: 20px;
+        padding: 10px 20px;
+        background-color: #0B3D91;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+    .btn-guardar:hover {
+        background-color: #0053ba;
+    }
+
+    .switch {
+        position: relative;
+        display: inline-block;
+        width: 46px;
+        height: 24px;
+    }
+
+    .switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #e57373;
+        transition: .4s;
+        border-radius: 24px;
+    }
+
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+
+    .switch input:checked + .slider {
+        background-color: #81c784;
+    }
+
+    .switch input:checked + .slider:before {
+        transform: translateX(22px);
+    }
+
+    .mensaje-confirmacion {
+        display: none;
+        margin-top: 15px;
+        padding: 12px;
+        background-color: #dff0d8;
+        color: #3c763d;
+        border: 1px solid #d6e9c6;
+        border-radius: 5px;
+        text-align: center;
+    }
+</style>
+
+<script>
+    function mostrarMensaje() {
+        setTimeout(() => {
+            const msg = document.getElementById('mensajeConfirmacion');
+            msg.style.display = 'block';
+            setTimeout(() => {
+                msg.style.display = 'none';
+            }, 3000);
+        }, 100);
+        return true;
+    }
+</script>

@@ -1,0 +1,229 @@
+﻿@model List<ProyectoMDGSharksWeb.Models.Venta>
+@{
+    ViewBag.Title = "Ventas";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var filtroCliente = ViewBag.FiltroCliente as string ?? "";
+    var fechaInicio = ViewBag.FechaInicio as string ?? "";
+    var fechaFin = ViewBag.FechaFin as string ?? "";
+}
+
+<h1>Listado de Ventas</h1>
+
+<a href="@Url.Action("Create", "Ventas")" class="btn-nuevo">+ Nueva Venta</a>
+
+<form method="get" class="form-filtros">
+    <input type="text" name="cliente" placeholder="Buscar por cliente..." value="@filtroCliente" class="input-text" />
+    <input type="date" name="fechaInicio" value="@fechaInicio" class="input-date" />
+    <input type="date" name="fechaFin" value="@fechaFin" class="input-date" />
+    <button type="submit" class="btn-filtrar">Buscar</button>
+    <a href="@Url.Action("Index", "Ventas")" class="btn-limpiar">Limpiar Filtro</a>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Usuario</th>
+            <th>Fecha</th>
+            <th>Total (Bs)</th>
+            <th>Descuento (Bs)</th>
+            <th>Pago (Bs)</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            foreach (var venta in Model)
+            {
+                <tr>
+                    <td>@venta.IdClienteNavigation.Nombre @venta.IdClienteNavigation.ApellidoPaterno @venta.IdClienteNavigation.ApellidoMaterno</td>
+                    <td>@venta.IdUsuarioNavigation.Nombre @venta.IdUsuarioNavigation.ApellidoMaterno</td>
+                    <td>@venta.FechaVenta?.ToString("yyyy-MM-dd")</td>
+                    <td>@venta.Total.ToString("0.00")</td>
+                    <td>@venta.Descuento.ToString("0.00")</td>
+                    <td>@venta.Pago.ToString("0.00")</td>
+                   
+                    <td>
+                        <a href="@Url.Action("Details", "Ventas", new { id = venta.Id })" class="btn btn-ver">Ver</a>
+                        <a href="@Url.Action("Edit", "Ventas", new { id = venta.Id })" class="btn btn-editar">Editar</a>
+
+                        <form asp-action="Eliminar" asp-controller="Ventas" method="post" style="display:inline" onsubmit="return confirm('⚠️ ¿Estás seguro de eliminar esta venta? Esta acción no se puede deshacer.');">
+                            <input type="hidden" name="id" value="@venta.Id" />
+                            <button type="submit" class="btn btn-eliminar">Eliminar</button>
+                        </form>
+
+                    </td>
+
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="7">No hay ventas registradas.</td></tr>
+        }
+    </tbody>
+</table>
+
+<div class="pagination">
+    @for (int i = 1; i <= totalPages; i++)
+    {
+        if (i == currentPage)
+        {
+            <span class="page current">@i</span>
+        }
+        else
+        {
+            <a class="page" href="@Url.Action("Index", new { page = i, cliente = filtroCliente, fechaInicio, fechaFin })">@i</a>
+        }
+    }
+</div>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    .btn-nuevo {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 16px;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        display: inline-block;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
+
+    .form-filtros {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .input-text, .input-date, .btn-filtrar, .btn-limpiar {
+        padding: 8px 12px;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .input-text {
+        width: 250px;
+    }
+
+    .btn-filtrar {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+        .btn-filtrar:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-limpiar {
+        background-color: darkred;
+        color: white;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+        .btn-limpiar:hover {
+            background-color: #a50000;
+        }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        margin-right: 5px;
+        font-weight: bold;
+        border-radius: 4px;
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-ver {
+        background-color: #17a2b8;
+    }
+
+        .btn-ver:hover {
+            background-color: #138496;
+        }
+
+    .btn-editar {
+        background-color: #ffc107; /* amarillo */
+        color: black;
+    }
+
+        .btn-editar:hover {
+            background-color: #e0a800;
+        }
+
+    .btn-eliminar {
+        background-color: #dc3545; /* rojo */
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-eliminar:hover {
+            background-color: #c82333;
+        }
+
+
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .page {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #0B3D91;
+        font-weight: bold;
+    }
+
+        .page.current {
+            background-color: #0B3D91;
+            color: white;
+        }
+
+        .page:hover {
+            background-color: #00bfff;
+            color: white;
+        }
+</style>

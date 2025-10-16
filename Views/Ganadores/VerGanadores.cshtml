@@ -1,0 +1,97 @@
+﻿@model List<ProyectoMDGSharksWeb.Models.GanadoresTorneo>
+
+@{
+    ViewBag.Title = "Ganadores del Torneo";
+    var torneo = ViewBag.Torneo as ProyectoMDGSharksWeb.Models.Torneo;
+}
+
+<h1>Ganadores del Torneo</h1>
+
+@if (torneo != null)
+{
+    <p><strong>Nombre:</strong> @torneo.Nombre</p>
+    <p><strong>Fecha:</strong> @torneo.Fecha.ToString("dd/MM/yyyy")</p>
+    <p><strong>Entrada:</strong> @torneo.Entrada.ToString("F2") Bs</p>
+}
+
+@if (Model != null && Model.Any())
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Puesto</th>
+                <th>Nombre del Cliente</th>
+                <th>CI</th>
+                <th>Premio (SharkCoins)</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var ganador in Model)
+            {
+                var cliente = ganador.TorneoCliente.IdClienteNavigation;
+                <tr>
+                    <td>@ganador.Puesto</td>
+                    <td>@cliente.Nombre @cliente.ApellidoPaterno @cliente.ApellidoMaterno</td>
+                    <td>@cliente.Ci</td>
+                    <td>@ganador.PremioSharkcoins.ToString("F2")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+else
+{
+    <p>No se encontraron ganadores registrados para este torneo.</p>
+}
+
+<a href="@Url.Action("Index", "Torneos")" class="btn btn-volver">Volver</a>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    p {
+        font-size: 16px;
+        margin-bottom: 5px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .btn-volver {
+        display: inline-block;
+        margin-top: 20px;
+        background-color: #6c757d;
+        color: white;
+        padding: 10px 16px;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+
+        .btn-volver:hover {
+            background-color: #5a6268;
+        }
+</style>

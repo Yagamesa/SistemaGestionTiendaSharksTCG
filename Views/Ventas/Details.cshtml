@@ -1,0 +1,136 @@
+﻿@model ProyectoMDGSharksWeb.Models.Venta
+@{
+    ViewBag.Title = "Detalle de Venta";
+    var detalles = ViewBag.Detalles as List<ProyectoMDGSharksWeb.Models.ProductoVenta>;
+}
+
+<h1>Detalle de Venta</h1>
+
+<div class="info">
+    <p><strong>Cliente:</strong> @Model.IdClienteNavigation.Nombre @Model.IdClienteNavigation.ApellidoPaterno @Model.IdClienteNavigation.ApellidoMaterno</p>
+    <p><strong>Usuario:</strong> @Model.IdUsuarioNavigation.Nombre @Model.IdUsuarioNavigation.ApellidoMaterno</p>
+    <p><strong>Fecha de Venta:</strong> @Model.FechaVenta?.ToString("yyyy-MM-dd")</p>
+</div>
+
+<h2>Productos Vendidos</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>Producto</th>
+            <th>Cantidad</th>
+            <th>Precio Unitario</th>
+            <th>Tipo de Pago</th>
+            <th>Total</th>
+            <th>Acción</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var d in detalles)
+        {
+            <tr>
+                <td>@d.IdProductoNavigation.Nombre</td>
+                <td>@d.Cantidad</td>
+                <td>@d.PrecioUnitario.ToString("F2") Bs</td>
+                <td>@d.TipoPago</td>
+                <td>@($"{(d.Cantidad * d.PrecioUnitario):0.00} Bs")</td>
+                <td>
+                    <a class="btn btn-ver" href="@Url.Action("Details", "Productos", new { id = d.IdProducto })">Ver Producto</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<h3>Resumen de la Venta</h3>
+<table class="table" style="max-width:400px;">
+    <tbody>
+        <tr>
+            <th>Total Bruto:</th>
+            <td>@($"{ViewBag.TotalBruto:0.00} Bs")</td>
+        </tr>
+        <tr>
+            <th>Descuento:</th>
+            <td>@($"{ViewBag.Descuento:0.00} Bs")</td>
+        </tr>
+        <tr>
+            <th>Total Final:</th>
+            <td>@($"{ViewBag.TotalFinal:0.00} Bs")</td>
+        </tr>
+        <tr>
+            <th>Pago:</th>
+            <td>@($"{ViewBag.Pago:0.00} Bs")</td>
+        </tr>
+        <tr>
+            <th>Deuda:</th>
+            <td>@($"{ViewBag.Deuda:0.00} Bs")</td>
+        </tr>
+    </tbody>
+</table>
+
+<a href="@Url.Action("Index", "Ventas")" class="btn btn-volver">Volver al listado</a>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    .info p {
+        margin: 5px 0;
+        font-size: 16px;
+    }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        margin-right: 5px;
+        font-weight: bold;
+        border-radius: 4px;
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-ver {
+        background-color: #17a2b8;
+    }
+
+        .btn-ver:hover {
+            background-color: #138496;
+        }
+
+    .btn-volver {
+        background-color: #6c757d;
+        color: white;
+        text-decoration: none;
+        padding: 10px 16px;
+        display: inline-block;
+        margin-top: 20px;
+        border-radius: 5px;
+    }
+
+        .btn-volver:hover {
+            background-color: #5a6268;
+        }
+</style>

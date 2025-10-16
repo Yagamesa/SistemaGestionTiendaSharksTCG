@@ -1,0 +1,121 @@
+﻿@model ProyectoMDGSharksWeb.Models.User
+
+@{
+    ViewBag.Title = "Editar Usuario";
+    var roles = ViewBag.Roles as List<ProyectoMDGSharksWeb.Models.Rol>;
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        display: block;
+    }
+
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .btn-submit, .btn-cancelar {
+        padding: 10px 20px;
+        margin-top: 10px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+
+    .error-msg {
+        color: red;
+        font-size: 0.9rem;
+    }
+</style>
+
+<h1>Editar Usuario</h1>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div>
+        <label asp-for="Nombre">Nombre</label>
+        <input asp-for="Nombre" />
+        <span asp-validation-for="Nombre" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label asp-for="ApellidoPaterno">Apellido Paterno</label>
+        <input asp-for="ApellidoPaterno" />
+        <span asp-validation-for="ApellidoPaterno" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label asp-for="ApellidoMaterno">Apellido Materno</label>
+        <input asp-for="ApellidoMaterno" />
+        <span asp-validation-for="ApellidoMaterno" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label for="Email">Usuario</label>
+        <input asp-for="Email" type="text" readonly />
+        <span asp-validation-for="Email" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label asp-for="Password">Contraseña</label>
+        <input asp-for="Password" type="password" />
+        <span asp-validation-for="Password" class="error-msg"></span>
+    </div>
+
+    <div>
+        <label asp-for="IdRol">Rol</label>
+        <select asp-for="IdRol">
+            <option value="">-- Seleccione un rol --</option>
+            @foreach (var rol in roles!)
+            {
+                <option value="@rol.Id" selected="@(rol.Id == Model.IdRol ? "selected" : null)">
+                    @rol.Nombre
+                </option>
+            }
+        </select>
+        <span asp-validation-for="IdRol" class="error-msg"></span>
+    </div>
+
+    <button type="submit" class="btn-submit">Guardar Cambios</button>
+    <a asp-action="Index" class="btn-cancelar">Cancelar</a>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

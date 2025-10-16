@@ -1,0 +1,71 @@
+﻿@model ProyectoMDGSharksWeb.Models.TipoEgreso
+
+@{
+    ViewBag.Title = "Agregar Tipo de Egreso";
+}
+
+<h1>Agregar Tipo de Egreso</h1>
+
+<form asp-action="CreateTipo" method="post">
+    <div>
+        <label>Nombre del Tipo de Egreso</label>
+        <input asp-for="Nombre" class="input-text" required />
+        <span asp-validation-for="Nombre" class="text-danger"></span>
+    </div>
+
+    <button type="submit" class="btn-nuevo">Guardar</button>
+    <a asp-action="IndexTipos" class="btn-limpiar">Cancelar</a>
+</form>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: bold;
+        display: block;
+        margin-bottom: 5px;
+    }
+
+    input[type="text"] {
+        width: 100%;
+        padding: 8px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        margin-bottom: 15px;
+    }
+
+    .btn-nuevo {
+        background-color: #28a745;
+        color: white;
+        padding: 10px 16px;
+        text-decoration: none;
+        font-weight: bold;
+        border-radius: 5px;
+        display: inline-block;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #218838;
+        }
+
+    .btn-limpiar {
+        background-color: darkred;
+        color: white;
+        padding: 10px 16px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+    }
+
+        .btn-limpiar:hover {
+            background-color: #a50000;
+        }
+
+    .text-danger {
+        color: red;
+    }
+</style>

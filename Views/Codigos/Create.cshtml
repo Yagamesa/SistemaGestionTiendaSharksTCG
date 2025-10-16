@@ -1,0 +1,171 @@
+﻿@{
+    ViewBag.Title = "Agregar Código TCG";
+    var juegos = new[] { "Yu-Gi-Oh!", "Pokémon", "Magic: The Gathering", "Dragon Ball Super", "One Piece", "Digimon", "Flesh and Blood" };
+    var clientePreseleccionado = ViewBag.IdCliente != null;
+}
+
+<h1>Registrar Nuevo Código</h1>
+
+<form asp-action="Create" method="post">
+    @Html.AntiForgeryToken()
+
+    <div class="input-wrapper">
+        <label>Buscar Cliente</label>
+
+        <input type="text"
+               id="clienteInput"
+               placeholder="Ej: Juan Pérez"
+               autocomplete="off"
+               value="@(clientePreseleccionado ? ViewBag.ClienteNombre : "")"
+        @(clientePreseleccionado ? "readonly" : "") />
+
+        <input type="hidden" name="idCliente" id="idCliente" value="@(clientePreseleccionado ? ViewBag.IdCliente : "")" />
+
+        <div id="clienteList"></div>
+    </div>
+
+    <div class="input-wrapper">
+        <label>Juego</label>
+        <input type="text" name="juego" list="juegosSugeridos" placeholder="Seleccione o escriba un juego..." required />
+        <datalist id="juegosSugeridos">
+            @foreach (var juego in juegos)
+            {
+                <option value="@juego" />
+            }
+        </datalist>
+    </div>
+
+    <div class="input-wrapper">
+        <label>Código</label>
+        <input type="text" name="codigo" placeholder="Ej: ABCD-1234-XYZ" required />
+    </div>
+
+    <button type="submit" class="btn-submit">Guardar</button>
+    <a href="@Url.Action("Index", "Codigos")" class="btn-cancelar">Cancelar</a>
+</form>
+
+@section Scripts {
+    <script>
+        const clientePreseleccionado = @Html.Raw(clientePreseleccionado.ToString().ToLower());
+        const input = document.getElementById('clienteInput');
+        const list = document.getElementById('clienteList');
+        const hiddenId = document.getElementById('idCliente');
+
+        if (!clientePreseleccionado) {
+            async function buscarClientes(term) {
+                const response = await fetch('/Codigos/BuscarClientes?term=' + encodeURIComponent(term));
+                const data = await response.json();
+                mostrarLista(data);
+            }
+
+            function mostrarLista(data) {
+                list.innerHTML = '';
+                if (!data.length) {
+                    list.innerHTML = '<div>No se encontraron resultados</div>';
+                    list.style.display = 'block';
+                    return;
+                }
+
+                data.forEach(c => {
+                    const div = document.createElement('div');
+                    div.textContent = c.nombreCompleto;
+                    div.setAttribute('data-id', c.id);
+                    div.onclick = () => {
+                        input.value = div.textContent;
+                        hiddenId.value = div.getAttribute('data-id');
+                        list.style.display = 'none';
+                    };
+                    list.appendChild(div);
+                });
+                list.style.display = 'block';
+            }
+
+            input.addEventListener('input', () => {
+                const term = input.value.trim();
+                hiddenId.value = '';
+                if (term.length > 1) {
+                    buscarClientes(term);
+                } else {
+                    list.style.display = 'none';
+                }
+            });
+        }
+    </script>
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        display: block;
+    }
+
+    input[type="text"], input[list], input[type="number"] {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        box-sizing: border-box;
+    }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        margin-left: 10px;
+        text-decoration: none;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+
+    .input-wrapper {
+        margin-bottom: 15px;
+        position: relative;
+    }
+
+    #clienteList {
+        border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        background-color: white;
+        width: 100%;
+        z-index: 1000;
+        display: none;
+    }
+
+        #clienteList div {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+            #clienteList div:hover {
+                background-color: #00bfff;
+                color: white;
+            }
+</style>

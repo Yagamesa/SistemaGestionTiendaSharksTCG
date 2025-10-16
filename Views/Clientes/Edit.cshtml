@@ -1,0 +1,99 @@
+﻿@model ProyectoMDGSharksWeb.Models.Cliente
+@{
+    ViewBag.Title = "Editar Cliente";
+}
+
+<h1>Editar Cliente</h1>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div>
+        <label>Nombre</label>
+        <input asp-for="Nombre" class="form-control" required />
+    </div>
+
+    <div>
+        <label>Apellido Paterno</label>
+        <input asp-for="ApellidoPaterno" class="form-control" />
+    </div>
+
+    <div>
+        <label>Apellido Materno</label>
+        <input asp-for="ApellidoMaterno" class="form-control" />
+    </div>
+
+    <div>
+        <label>CI</label>
+        <input asp-for="Ci" class="form-control" required />
+    </div>
+
+    <div>
+        <label>Celular</label>
+        <input asp-for="Celular" class="form-control" />
+    </div>
+
+    <div>
+        <label>SharkCoins</label>
+        <input asp-for="SharkCoins" class="form-control" step="0.01" />
+    </div>
+
+    <div>
+        <label>Deuda</label>
+        <input asp-for="Deuda" class="form-control" step="0.01" />
+    </div>
+
+    <button type="submit" class="btn-submit">Guardar Cambios</button>
+    <a asp-action="Index" class="btn-cancelar">Cancelar</a>
+</form>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    label {
+        font-weight: 600;
+        display: block;
+        margin-top: 15px;
+        margin-bottom: 5px;
+    }
+
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+    }
+
+    .btn-submit, .btn-cancelar {
+        padding: 10px 20px;
+        margin-top: 20px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        text-decoration: none;
+    }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+</style>

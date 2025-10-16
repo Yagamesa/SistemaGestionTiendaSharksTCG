@@ -1,0 +1,289 @@
+﻿@model ProyectoMDGSharksWeb.Models.Venta
+@{
+    ViewBag.Title = "Editar Venta";
+}
+
+<h1>Editar Venta</h1>
+
+<form asp-action="Edit" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+
+    <div class="form-group" style="position:relative;">
+        <label>Cliente</label>
+        <input type="hidden" id="IdCliente" name="idCliente" value="@Model.IdCliente" />
+        <input type="text" id="clienteInput" class="input-text" placeholder="Buscar cliente..."
+               value="@Model.IdClienteNavigation.Nombre @Model.IdClienteNavigation.ApellidoPaterno @Model.IdClienteNavigation.ApellidoMaterno"
+               autocomplete="off" required />
+        <div id="clienteSuggestions" class="autocomplete-suggestions"></div>
+    </div>
+
+    <div class="form-group">
+        <label>Usuario</label>
+        <input type="text" class="input-text" value="@Model.IdUsuarioNavigation.Nombre @Model.IdUsuarioNavigation.ApellidoPaterno" disabled />
+        <input type="hidden" name="IdUsuario" value="@Model.IdUsuario" />
+    </div>
+
+    <div class="form-group">
+        <label>Descuento (Bs)</label>
+        <input type="number" step="0.01" name="descuento" value="@Model.Descuento" class="input-text" required />
+    </div>
+
+    <div class="form-group">
+        <label>Pago (Bs)</label>
+        <input type="number" step="0.01" name="pago" value="@Model.Pago" class="input-text" required />
+    </div>
+
+    <hr />
+
+    <h3>Productos</h3>
+    <div class="form-group" style="display:flex; gap:10px; flex-wrap: wrap; align-items:center;">
+        <input type="text" id="productoInput" class="input-text" placeholder="Buscar producto..." autocomplete="off" style="flex:2;" />
+        <input type="number" id="cantidadInput" placeholder="Cantidad" class="input-text" min="1" value="1" style="width:80px;" />
+        <input type="number" step="0.01" id="precioInput" placeholder="Precio unitario" class="input-text" style="width:120px;" />
+        <select id="tipoPagoInput" class="input-text" style="width:130px;">
+            <option value="Efectivo">Efectivo</option>
+            <option value="SharkCoins">SharkCoins</option>
+            <option value="Mixto">Mixto</option>
+        </select>
+        <button type="button" onclick="agregarProducto()" class="btn-agregar" style="flex-shrink:0;">Agregar</button>
+    </div>
+
+    <table class="table" id="productosTable" style="margin-top:20px;">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario</th>
+                <th>Tipo de Pago</th>
+                <th>Total</th>
+                <th>Acción</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <div class="form-group" style="margin-top: 20px;">
+        <button type="submit" class="btn-guardar">Guardar Cambios</button>
+        <a href="@Url.Action("Index", "Ventas")" class="btn-cancelar">Cancelar</a>
+    </div>
+</form>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script>
+        let clienteInput = $("#clienteInput");
+        let idCliente = $("#IdCliente");
+        clienteInput.on("input", function () {
+            let term = clienteInput.val();
+            if (term.length < 2) {
+                $("#clienteSuggestions").empty();
+                return;
+            }
+            $.getJSON("/Ventas/BuscarClientes?term=" + encodeURIComponent(term), function (data) {
+                let sugerencias = data.map(c => `<div class="suggestion" data-id="${c.id}">${c.nombreCompleto}</div>`);
+                $("#clienteSuggestions").html(sugerencias.join(""));
+            });
+        });
+
+        $("#clienteSuggestions").on("click", ".suggestion", function () {
+            idCliente.val($(this).data("id"));
+            clienteInput.val($(this).text());
+            $("#clienteSuggestions").empty();
+        });
+
+        let productoSeleccionado = null;
+        $("#productoInput").on("input", function () {
+            let term = $(this).val();
+            if (term.length < 2) {
+                productoSeleccionado = null;
+                $("#precioInput").val("");
+                return;
+            }
+            $.getJSON("/Ventas/BuscarProductos?term=" + encodeURIComponent(term), function (data) {
+                productoSeleccionado = null;
+                if (data.length > 0) {
+                    productoSeleccionado = data[0];
+                    $("#precioInput").val(productoSeleccionado.precio);
+                } else {
+                    $("#precioInput").val("");
+                }
+            });
+        });
+
+        function agregarProducto() {
+            if (!productoSeleccionado) return alert("Seleccione un producto válido.");
+
+            let cantidad = parseInt($("#cantidadInput").val());
+            let precio = parseFloat($("#precioInput").val());
+            let tipoPago = $("#tipoPagoInput").val();
+
+            if (isNaN(cantidad) || cantidad <= 0) return alert("Cantidad inválida.");
+            if (isNaN(precio) || precio <= 0) return alert("Precio inválido.");
+
+            $.ajax({
+                url: "/Ventas/AgregarProducto",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({
+                    idProducto: productoSeleccionado.id,
+                    cantidad,
+                    precioUnitario: precio,
+                    tipoPago
+                }),
+                success: cargarProductos,
+                error: function () { alert("Error al agregar producto."); }
+            });
+        }
+
+        function eliminarProducto(idProducto) {
+            $.ajax({
+                url: "/Ventas/EliminarProducto",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(idProducto),
+                success: cargarProductos,
+                error: function () { alert("Error al eliminar producto."); }
+            });
+        }
+
+        function cargarProductos() {
+            $.getJSON("/Ventas/ObtenerProductos", function (productos) {
+                let filas = productos.map(p =>
+                    `<tr>
+                        <td>${p.productoNombre}</td>
+                        <td>${p.cantidad}</td>
+                        <td>${p.precioUnitario.toFixed(2)}</td>
+                        <td>${p.tipoPago}</td>
+                        <td>${p.total.toFixed(2)}</td>
+                        <td><button type="button" onclick="eliminarProducto(${p.idProducto})" class="btn btn-danger">Eliminar</button></td>
+                    </tr>`);
+                $("#productosTable tbody").html(filas.join(""));
+            });
+        }
+
+        $(document).ready(function () {
+            cargarProductos();
+        });
+    </script>
+
+    <style>
+        h1 {
+            font-weight: bold;
+            color: #001f3f;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 8px;
+        }
+
+        .input-text {
+            width: 100%;
+            padding: 8px 12px;
+            font-size: 14px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        .btn-agregar, .btn-guardar, .btn-cancelar {
+            padding: 10px 16px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn-agregar {
+            background-color: #28a745;
+            color: white;
+        }
+
+            .btn-agregar:hover {
+                background-color: #218838;
+            }
+
+        .btn-guardar {
+            background-color: #007bff;
+            color: white;
+            margin-right: 10px;
+        }
+
+            .btn-guardar:hover {
+                background-color: #0056b3;
+            }
+
+        .btn-cancelar {
+            background-color: darkred;
+            color: white;
+        }
+
+            .btn-cancelar:hover {
+                background-color: #a50000;
+            }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 10px;
+        }
+
+        th, td {
+            padding: 10px;
+            border: 1px solid #ccc;
+            text-align: left;
+        }
+
+        th {
+            background-color: #0B3D91;
+            color: white;
+        }
+
+        tr:hover {
+            background-color: #00bfff;
+            color: #0B3D91;
+        }
+
+        .btn-danger {
+            background-color: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+
+            .btn-danger:hover {
+                background-color: #c82333;
+            }
+
+        .autocomplete-suggestions {
+            position: absolute;
+            background-color: white;
+            border: 1px solid #ccc;
+            z-index: 1000;
+            width: 100%;
+            max-height: 150px;
+            overflow-y: auto;
+        }
+
+        .suggestion {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+            .suggestion:hover {
+                background-color: #f0f0f0;
+            }
+    </style>
+}

@@ -1,0 +1,60 @@
+﻿@model ProyectoMDGSharksWeb.Models.Categoria
+
+@{
+    ViewBag.Title = "Eliminar Categoría";
+}
+
+<style>
+    h1 {
+        font-weight: 700;
+        color: crimson;
+        user-select: none;
+    }
+
+    p.advertencia {
+        font-size: 1.2rem;
+        color: #333;
+        margin-bottom: 25px;
+    }
+
+    a.btn-confirmar,
+    a.btn-cancelar {
+        padding: 10px 18px;
+        border-radius: 6px;
+        font-weight: 700;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        user-select: none;
+        transition: background-color 0.3s ease;
+        margin-right: 12px;
+        color: var(--blanco);
+    }
+
+    a.btn-confirmar {
+        background-color: crimson;
+    }
+
+        a.btn-confirmar:hover {
+            background-color: #aa0000;
+        }
+
+    a.btn-cancelar {
+        background-color: var(--azul-oscuro);
+    }
+
+        a.btn-cancelar:hover {
+            background-color: var(--celeste);
+            color: var(--azul-oscuro);
+        }
+</style>
+
+<h1>Eliminar Categoría</h1>
+
+<p class="advertencia">
+    ¿Estás seguro que deseas eliminar la categoría <strong>@Model.Nombre</strong>?
+</p>
+
+<!-- Link que llama al POST de eliminación -->
+<a asp-action="DeleteConfirmed" asp-route-id="@Model.Id" class="btn-confirmar">Eliminar</a>
+<a href="@Url.Action("Index")" class="btn-cancelar">Cancelar</a>

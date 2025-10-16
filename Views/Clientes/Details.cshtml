@@ -1,0 +1,57 @@
+﻿@model ProyectoMDGSharksWeb.Models.Cliente
+
+@{
+    ViewBag.Title = "Detalles del Cliente";
+    var returnUrl = ViewContext.HttpContext.Request.Headers["Referer"].ToString();
+}
+
+<h1>Detalles del Cliente</h1>
+
+<div>
+    <p><strong>ID:</strong> @Model.Id</p>
+    <p><strong>Nombre:</strong> @Model.Nombre</p>
+    <p><strong>Apellido Paterno:</strong> @Model.ApellidoPaterno</p>
+    <p><strong>Apellido Materno:</strong> @Model.ApellidoMaterno</p>
+    <p><strong>CI:</strong> @Model.Ci</p>
+    <p><strong>Celular:</strong> @Model.Celular</p>
+    <p><strong>SharkCoins:</strong> @(Model.SharkCoins?.ToString("F2") ?? "0.00")</p>
+    <p><strong>Deuda:</strong> @(Model.Deuda?.ToString("F2") ?? "0.00")</p>
+
+</div>
+
+@if (!string.IsNullOrEmpty(returnUrl))
+{
+    <a href="@returnUrl" class="btn-cancelar">Volver</a>
+}
+else
+{
+    <a href="@Url.Action("Index", "Clientes")" class="btn-cancelar">Volver</a>
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    p {
+        font-size: 1.1em;
+        margin: 10px 0;
+    }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-top: 20px;
+        display: inline-block;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+</style>

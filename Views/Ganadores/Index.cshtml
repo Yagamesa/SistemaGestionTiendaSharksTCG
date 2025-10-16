@@ -1,0 +1,189 @@
+﻿@model IEnumerable<ProyectoMDGSharksWeb.Models.GanadoresTorneo>
+
+@{
+    ViewBag.Title = "Ganadores de Torneos";
+    var currentPage = ViewBag.CurrentPage ?? 1;
+    var totalPages = ViewBag.TotalPages ?? 1;
+    var filtroCliente = ViewBag.FiltroCliente as string ?? "";
+    var filtroTorneo = ViewBag.FiltroTorneo as string ?? "";
+    var fechaInicio = ViewBag.FechaInicio as string ?? "";
+    var fechaFin = ViewBag.FechaFin as string ?? "";
+}
+
+<h1>Ganadores de Torneos</h1>
+
+<form method="get" class="form-filtros">
+    <input type="text" name="cliente" placeholder="Buscar por cliente..." value="@filtroCliente" class="input-text" />
+    <input type="text" name="torneo" placeholder="Buscar por torneo..." value="@filtroTorneo" class="input-text" />
+    <input type="date" name="fechaInicio" value="@fechaInicio" class="input-date" />
+    <input type="date" name="fechaFin" value="@fechaFin" class="input-date" />
+    <button type="submit" class="btn-filtrar">Buscar</button>
+    <a href="@Url.Action("Index", "GanadoresTorneo")" class="btn-limpiar">Limpiar Filtro</a>
+</form>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Cliente</th>
+            <th>Torneo</th>
+            <th>Fecha</th>
+            <th>Puesto</th>
+            <th>Premio</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Any())
+        {
+            foreach (var ganador in Model)
+            {
+                <tr>
+                    <td>
+                        @ganador.TorneoCliente.IdClienteNavigation.Nombre
+                        @ganador.TorneoCliente.IdClienteNavigation.ApellidoPaterno
+                        @ganador.TorneoCliente.IdClienteNavigation.ApellidoMaterno
+                    </td>
+                    <td>@ganador.TorneoCliente.IdTorneoNavigation.Nombre</td>
+                    <td>@ganador.TorneoCliente.IdTorneoNavigation.Fecha.ToString("yyyy-MM-dd")</td>
+                    <td>@ganador.Puesto</td>
+                    <td>@ganador.PremioSharkcoins.ToString("F2") SC</td>
+                    <td>
+                        <a href="@Url.Action("Details", "GanadoresTorneo", new { id = ganador.Id })" class="btn btn-ver">Ver</a>
+                    </td>
+                </tr>
+            }
+        }
+        else
+        {
+            <tr><td colspan="6">No hay ganadores registrados con esos criterios.</td></tr>
+        }
+    </tbody>
+</table>
+
+<div class="pagination">
+    @for (int i = 1; i <= totalPages; i++)
+    {
+        if (i == currentPage)
+        {
+            <span class="page current">@i</span>
+        }
+        else
+        {
+            <a class="page" href="@Url.Action("Index", new { page = i, cliente = filtroCliente, torneo = filtroTorneo, fechaInicio, fechaFin })">@i</a>
+        }
+    }
+</div>
+
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    .form-filtros {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+        flex-wrap: wrap;
+    }
+
+    .input-text, .input-date, .btn-filtrar, .btn-limpiar {
+        padding: 8px 12px;
+        font-size: 14px;
+        border-radius: 4px;
+        border: 1px solid #ccc;
+    }
+
+    .input-text {
+        width: 250px;
+    }
+
+    .btn-filtrar {
+        background-color: #007bff;
+        color: white;
+        font-weight: bold;
+    }
+
+        .btn-filtrar:hover {
+            background-color: #0056b3;
+        }
+
+    .btn-limpiar {
+        background-color: darkred;
+        color: white;
+        font-weight: bold;
+        text-decoration: none;
+    }
+
+        .btn-limpiar:hover {
+            background-color: #a50000;
+        }
+
+    .table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 15px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .btn {
+        padding: 6px 12px;
+        margin-right: 5px;
+        font-weight: bold;
+        border-radius: 4px;
+        text-decoration: none;
+        color: white;
+    }
+
+    .btn-ver {
+        background-color: #17a2b8;
+    }
+
+        .btn-ver:hover {
+            background-color: #138496;
+        }
+
+    .pagination {
+        margin-top: 20px;
+        text-align: center;
+    }
+
+    .page {
+        display: inline-block;
+        padding: 8px 12px;
+        margin: 4px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        text-decoration: none;
+        color: #0B3D91;
+        font-weight: bold;
+    }
+
+        .page.current {
+            background-color: #0B3D91;
+            color: white;
+        }
+
+        .page:hover {
+            background-color: #00bfff;
+            color: white;
+        }
+</style>

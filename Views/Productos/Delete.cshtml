@@ -1,0 +1,68 @@
+﻿@model ProyectoMDGSharksWeb.Models.Producto
+
+@{
+    ViewBag.Title = "Eliminar Producto";
+}
+
+<style>
+    h1 {
+        color: var(--azul-oscuro);
+        user-select: none;
+    }
+
+    p.warning {
+        color: crimson;
+        font-weight: 700;
+        margin-top: 20px;
+    }
+
+    button.btn-eliminar {
+        background-color: crimson;
+        color: white;
+        border: none;
+        padding: 10px 20px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 700;
+        margin-right: 15px;
+    }
+
+        button.btn-eliminar:hover {
+            background-color: darkred;
+        }
+
+    a.btn-cancelar {
+        background-color: var(--celeste);
+        color: var(--blanco);
+        padding: 8px 16px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+    }
+
+        a.btn-cancelar:hover {
+            background-color: var(--azul-oscuro);
+        }
+</style>
+
+<h1>Eliminar Producto</h1>
+
+<p>¿Está seguro que desea eliminar el siguiente producto?</p>
+
+<dl>
+    <dt>Nombre</dt>
+    <dd>@Model.Nombre</dd>
+
+    <dt>Categoría</dt>
+    <dd>@Model.IdCategoriaNavigation?.Nombre</dd>
+
+    <dt>Precio Venta</dt>
+    <dd>@Model.PrecioVenta?.ToString("C")</dd>
+</dl>
+
+<form asp-action="DeleteConfirmed" method="post">
+    @Html.AntiForgeryToken()
+    <input type="hidden" asp-for="Id" />
+    <button type="submit" class="btn-eliminar">Eliminar</button>
+    <a href="@Url.Action("Index")" class="btn-cancelar">Cancelar</a>
+</form>

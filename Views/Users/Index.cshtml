@@ -1,0 +1,121 @@
+﻿@model List<ProyectoMDGSharksWeb.Models.User>
+@{
+    ViewBag.Title = "Listado de Usuarios";
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    .btn-nuevo {
+        display: inline-block;
+        background-color: #00bfff;
+        color: white;
+        padding: 10px 18px;
+        margin-bottom: 15px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #005f99;
+        }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        table-layout: fixed;
+    }
+
+    colgroup col:nth-child(1) {
+        width: 10%;
+    }
+
+    colgroup col:nth-child(2) {
+        width: 30%;
+    }
+
+    colgroup col:nth-child(3) {
+        width: 25%;
+    }
+
+    colgroup col:nth-child(4) {
+        width: 20%;
+    }
+
+    colgroup col:nth-child(5) {
+        width: 15%;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        word-wrap: break-word;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .acciones a {
+        margin-right: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        color: #0B3D91;
+    }
+
+        .acciones a:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<h1>Listado de Usuarios</h1>
+
+<a href="@Url.Action("Create", "Users")" class="btn-nuevo">+ Agregar Usuario</a>
+
+<table>
+    <colgroup>
+        <col />
+        <col />
+        <col />
+        <col />
+        <col />
+    </colgroup>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre Completo</th>
+            <th>Usuario</th>
+            <th>Rol</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var u in Model)
+        {
+            <tr>
+                <td>@u.Id</td>
+                <td>@u.Nombre @u.ApellidoPaterno @u.ApellidoMaterno</td>
+                <td>@u.Email</td>
+                <td>@u.IdRolNavigation?.Nombre</td>
+                <td class="acciones">
+                    <a href="@Url.Action("Details", "Users", new { id = u.Id })">Ver</a>
+                    <a href="@Url.Action("Edit", "Users", new { id = u.Id })">Editar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

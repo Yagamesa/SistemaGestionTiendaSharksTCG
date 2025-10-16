@@ -1,0 +1,369 @@
+﻿@{
+    ViewBag.Title = "Ventas Acumulativas";
+    var idUsuario = ViewBag.IdUsuario;
+}
+
+<h1>Ventas Acumulativas del Día</h1>
+
+<form asp-action="GuardarTodas" method="post" onsubmit="return confirmarGuardar();">
+    @Html.AntiForgeryToken()
+    <input type="hidden" id="IdUsuario" name="IdUsuario" value="@idUsuario" />
+
+    <div class="input-wrapper">
+        <label>Buscar Cliente</label>
+        <input type="hidden" id="IdCliente" />
+        <input type="text" id="clienteInput" placeholder="Nombre del cliente..." autocomplete="off" />
+        <div id="clienteList"></div>
+    </div>
+
+    <div class="input-wrapper">
+        <label>Buscar Producto</label>
+        <input type="hidden" id="IdProducto" />
+        <input type="text" id="productoInput" placeholder="Nombre del producto..." autocomplete="off" />
+        <div id="productoList"></div>
+    </div>
+
+    <div>
+        <label>Cantidad</label>
+        <input type="number" id="Cantidad" step="1" min="1" />
+    </div>
+
+    <div>
+        <label>Precio Unitario (Bs)</label>
+        <input type="number" id="PrecioUnitario" step="0.01" min="0" readonly />
+    </div>
+
+    <div>
+        <label>Descuento (Bs)</label>
+        <input type="number" id="Descuento" step="0.01" min="0" value="0" />
+    </div>
+
+    <div>
+        <label>Pago (Bs)</label>
+        <input type="number" id="Pago" step="0.01" min="0" value="0" />
+    </div>
+
+    <div>
+        <label>Tipo de Pago</label>
+        <select id="TipoPago">
+            <option value="Efectivo">Efectivo</option>
+            <option value="QR">QR</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Tarjeta">Tarjeta</option>
+        </select>
+    </div>
+
+    <input type="hidden" id="IdTemp" />
+    <button type="button" class="btn-submit" onclick="agregarOActualizar()">Agregar/Actualizar Venta</button>
+
+    <h2>Ventas Acumuladas</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Cliente</th>
+                <th>Producto</th>
+                <th>Cantidad</th>
+                <th>Precio Unitario (Bs)</th>
+                <th>Descuento (Bs)</th>
+                <th>Pago (Bs)</th>
+                <th>Total (Bs)</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody id="tablaVentas"></tbody>
+    </table>
+
+    <button type="submit" class="btn-submit">Cerrar Ventas</button>
+    <button type="button" class="btn-cancelar" onclick="cancelarVentas()">Cancelar</button>
+</form>
+
+@section Scripts {
+    <script>
+        let saliendo = true;
+
+        window.addEventListener("beforeunload", function (e) {
+            if (saliendo) {
+                e.preventDefault();
+                e.returnValue = "Tienes ventas acumuladas sin guardar. ¿Estás seguro de salir?";
+            }
+        });
+
+        const idCliente = document.getElementById("IdCliente");
+        const clienteInput = document.getElementById("clienteInput");
+        const clienteList = document.getElementById("clienteList");
+
+        clienteInput.addEventListener("input", () => {
+            const term = clienteInput.value.trim();
+            idCliente.value = "";
+            if (term.length > 1) buscarClientes(term);
+            else clienteList.style.display = "none";
+        });
+
+        async function buscarClientes(term) {
+            const res = await fetch(`/VentasAcumulativas/BuscarClientes?term=${encodeURIComponent(term)}`);
+            const data = await res.json();
+            clienteList.innerHTML = "";
+            data.forEach(c => {
+                const div = document.createElement("div");
+                div.textContent = c.nombreCompleto;
+                div.dataset.id = c.id;
+                div.onclick = () => {
+                    clienteInput.value = div.textContent;
+                    idCliente.value = div.dataset.id;
+                    clienteList.style.display = "none";
+                };
+                clienteList.appendChild(div);
+            });
+            clienteList.style.display = "block";
+        }
+
+        const idProducto = document.getElementById("IdProducto");
+        const productoInput = document.getElementById("productoInput");
+        const productoList = document.getElementById("productoList");
+
+        productoInput.addEventListener("input", () => {
+            const term = productoInput.value.trim();
+            idProducto.value = "";
+            if (term.length > 1) buscarProductos(term);
+            else productoList.style.display = "none";
+        });
+
+        async function buscarProductos(term) {
+            const res = await fetch(`/VentasAcumulativas/BuscarProductos?term=${encodeURIComponent(term)}`);
+            const data = await res.json();
+            productoList.innerHTML = "";
+            data.forEach(p => {
+                const div = document.createElement("div");
+                div.textContent = p.nombre;
+                div.dataset.id = p.id;
+                div.dataset.precio = p.precio;
+                div.onclick = () => {
+                    productoInput.value = div.textContent;
+                    idProducto.value = p.id;
+                    document.getElementById("PrecioUnitario").value = p.precio.toFixed(2);
+                    productoList.style.display = "none";
+                };
+                productoList.appendChild(div);
+            });
+            productoList.style.display = "block";
+        }
+
+        function agregarOActualizar() {
+            const dto = {
+                IdTemp: document.getElementById("IdTemp").value || Date.now().toString(),
+                IdCliente: parseInt(idCliente.value),
+                IdProducto: parseInt(idProducto.value),
+                Cantidad: parseInt(document.getElementById("Cantidad").value),
+                PrecioUnitario: parseFloat(document.getElementById("PrecioUnitario").value),
+                Descuento: parseFloat(document.getElementById("Descuento").value) || 0,
+                Pago: parseFloat(document.getElementById("Pago").value) || 0,
+                TipoPago: document.getElementById("TipoPago").value
+            };
+
+            if (!dto.IdCliente || !dto.IdProducto || dto.Cantidad < 1) {
+                alert("Completa todos los campos obligatorios.");
+                return;
+            }
+
+            fetch('/VentasAcumulativas/AgregarVentaIndividual', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dto)
+            }).then(() => {
+                limpiarForm();
+                cargarTabla();
+            });
+        }
+
+        function cargarTabla() {
+            fetch('/VentasAcumulativas/ObtenerVentas')
+                .then(res => res.json())
+                .then(data => {
+                    const tabla = document.getElementById("tablaVentas");
+                    tabla.innerHTML = '';
+                    data.forEach(v => {
+                        const totalCalc = (v.cantidad * v.precioUnitario) - (v.descuento || 0);
+                        tabla.innerHTML += `
+                            <tr>
+                                <td>${v.clienteNombre}</td>
+                                <td>${v.productoNombre}</td>
+                                <td>${v.cantidad}</td>
+                                <td>${v.precioUnitario.toFixed(2)}</td>
+                                <td>${(v.descuento || 0).toFixed(2)}</td>
+                                <td>${(v.pago || 0).toFixed(2)}</td>
+                                <td>${totalCalc.toFixed(2)}</td>
+                                <td class='acciones'>
+                                    <button type="button" onclick='editar("${v.idTemp}")'>Editar</button>
+                                    <button type="button" onclick='eliminar("${v.idTemp}")'>Eliminar</button>
+                                </td>
+                            </tr>`;
+                    });
+                });
+        }
+
+        function editar(idTemp) {
+            fetch('/VentasAcumulativas/ObtenerVentas')
+                .then(res => res.json())
+                .then(data => {
+                    const v = data.find(x => x.idTemp === idTemp);
+                    if (!v) return;
+                    document.getElementById("IdTemp").value = v.idTemp;
+                    clienteInput.value = v.clienteNombre;
+                    productoInput.value = v.productoNombre;
+                    document.getElementById("Cantidad").value = v.cantidad;
+                    document.getElementById("PrecioUnitario").value = v.precioUnitario.toFixed(2);
+                    document.getElementById("Descuento").value = (v.descuento || 0).toFixed(2);
+                    document.getElementById("Pago").value = (v.pago || 0).toFixed(2);
+                    document.getElementById("TipoPago").value = v.tipoPago;
+
+                    idCliente.value = v.idCliente;
+                    idProducto.value = v.idProducto;
+                });
+        }
+
+        function eliminar(idTemp) {
+            fetch('/VentasAcumulativas/EliminarVenta', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(idTemp)
+            }).then(() => cargarTabla());
+        }
+
+        function cancelarVentas() {
+            if (confirm("¿Seguro que quieres cancelar todas las ventas acumuladas?")) {
+                saliendo = false;
+                fetch('/VentasAcumulativas/CancelarAcumuladas', { method: 'POST' })
+                    .then(() => window.location.href = '/Ventas/Index');
+            }
+        }
+
+        function confirmarGuardar() {
+            saliendo = false;
+            return true;
+        }
+
+        function limpiarForm() {
+            document.getElementById("IdTemp").value = '';
+            clienteInput.value = '';
+            productoInput.value = '';
+            idCliente.value = '';
+            idProducto.value = '';
+            document.getElementById("Cantidad").value = '';
+            document.getElementById("PrecioUnitario").value = '';
+            document.getElementById("Descuento").value = '0';
+            document.getElementById("Pago").value = '0';
+            document.getElementById("TipoPago").selectedIndex = 0;
+        }
+
+        cargarTabla();
+    </script>
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+    }
+
+    input[type="text"], input[type="number"], select {
+        width: 100%;
+        padding: 10px;
+        margin: 5px 0 15px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+
+    .btn-submit, .btn-cancelar {
+        padding: 10px 20px;
+        margin-top: 10px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+    }
+
+    .btn-submit {
+        background-color: #00bfff;
+        color: white;
+    }
+
+        .btn-submit:hover {
+            background-color: #005f99;
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+
+    .input-wrapper {
+        position: relative;
+        max-width: 400px;
+    }
+
+    #clienteList, #productoList {
+        border: 1px solid #ccc;
+        max-height: 150px;
+        overflow-y: auto;
+        position: absolute;
+        background-color: white;
+        width: 100%;
+        z-index: 1000;
+        display: none;
+    }
+
+        #clienteList div, #productoList div {
+            padding: 8px;
+            cursor: pointer;
+        }
+
+            #clienteList div:hover, #productoList div:hover {
+                background-color: #00bfff;
+                color: white;
+            }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        table-layout: fixed;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        word-wrap: break-word;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .acciones button {
+        background: none;
+        border: none;
+        color: crimson;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .acciones button:hover {
+            text-decoration: underline;
+        }
+</style>

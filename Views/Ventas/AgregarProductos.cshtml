@@ -1,0 +1,272 @@
+﻿@{
+    ViewBag.Title = "Agregar Productos a la Venta";
+    int ventaId = ViewBag.VentaId;
+    string clienteNombre = ViewBag.ClienteNombre;
+}
+
+<style>
+    h1 {
+        font-weight: 700;
+        color: var(--azul-oscuro);
+        user-select: none;
+    }
+
+    .form-section {
+        margin-bottom: 25px;
+    }
+
+    label {
+        font-weight: 600;
+        display: block;
+        margin-bottom: 5px;
+        color: var(--azul-oscuro);
+    }
+
+    input, select {
+        width: 100%;
+        padding: 8px;
+        margin-bottom: 10px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        font-size: 1rem;
+    }
+
+    .btn {
+        display: inline-block;
+        padding: 8px 14px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background-color 0.3s ease;
+        cursor: pointer;
+        margin-right: 10px;
+    }
+
+    .btn-agregar {
+        background-color: var(--celeste);
+        color: white;
+    }
+
+        .btn-agregar:hover {
+            background-color: var(--azul-oscuro);
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+    }
+
+    .btn-cerrar {
+        background-color: var(--azul-oscuro);
+        color: white;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+    }
+
+    th {
+        background-color: var(--azul-oscuro);
+        color: white;
+    }
+
+    tr:hover {
+        background-color: var(--celeste);
+        color: var(--azul-oscuro);
+    }
+
+    .acciones button {
+        background: none;
+        border: none;
+        color: crimson;
+        font-weight: bold;
+        cursor: pointer;
+    }
+
+        .acciones button:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<h1>Agregar Productos a la Venta</h1>
+
+<div class="form-section">
+    <p><strong>ID Venta:</strong> @ventaId</p>
+    <p><strong>Cliente:</strong> @clienteNombre</p>
+</div>
+
+<div class="form-section">
+    <label for="productoInput">Buscar Producto</label>
+    <input id="productoInput" type="text" placeholder="Escriba el nombre del producto..." autocomplete="off" />
+    <input type="hidden" id="productoId" name="IdProducto" />
+
+    <label for="cantidad">Cantidad</label>
+    <input type="number" id="cantidad" name="Cantidad" min="1" value="1" />
+
+    <label for="precioUnitario">Precio Unitario</label>
+    <input type="number" id="precioUnitario" name="PrecioUnitario" step="0.01" min="0" value="0" />
+
+    <label for="tipoPago">Tipo de Pago</label>
+    <select id="tipoPago" name="TipoPago">
+        <option value="Efectivo">Efectivo</option>
+        <option value="Tarjeta">Tarjeta</option>
+        <option value="Sharkcoins">Sharkcoins</option>
+    </select>
+
+    <button class="btn btn-agregar" onclick="agregarProducto()">Agregar Producto</button>
+</div>
+
+<h2>Productos Agregados</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Nombre</th>
+            <th>Cantidad</th>
+            <th>Tipo de Pago</th>
+            <th>Precio Unitario</th>
+            <th>Total</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody id="tablaProductos"></tbody>
+</table>
+
+<div style="margin-top: 30px;">
+    <a href="@Url.Action("Create", "Ventas")" class="btn btn-cerrar">Cerrar Venta</a>
+
+    <button class="btn btn-cancelar" onclick="cancelarVenta()">Cancelar Venta</button>
+</div>
+
+@section Scripts {
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://code.jquery.com/ui/1.13.0/jquery-ui.min.js"></script>
+    <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.0/themes/base/jquery-ui.css" />
+
+    <script>
+        const ventaId = @ventaId;
+
+        $(function () {
+            cargarTabla();
+
+            $("#productoInput").autocomplete({
+                source: function (request, response) {
+                    $.getJSON("/Ventas/BuscarProductos", { term: request.term }, function (data) {
+                        response($.map(data, function (item) {
+                            return {
+                                label: item.nombre + " ($" + item.precioVenta.toFixed(2) + ")",
+                                value: item.nombre,
+                                id: item.id,
+                                precio: item.precioVenta
+                            };
+                        }));
+                    });
+                },
+                select: function (event, ui) {
+                    $("#productoId").val(ui.item.id);
+                    $("#precioUnitario").val(ui.item.precio.toFixed(2));
+                },
+                minLength: 1
+            });
+        });
+
+               function agregarProducto() {
+            const idProducto = $("#productoId").val();
+            const cantidad = parseInt($("#cantidad").val());
+            const tipoPago = $("#tipoPago").val();
+            const precioUnitario = parseFloat($("#precioUnitario").val());
+
+            if (!idProducto || cantidad <= 0 || !precioUnitario || precioUnitario <= 0) {
+                alert("Debe seleccionar un producto válido, ingresar una cantidad y precio unitario mayor a 0.");
+                return;
+            }
+
+            const productoVenta = {
+                IdProducto: parseInt(idProducto),
+                IdVenta: ventaId,
+                Cantidad: cantidad,
+                PrecioUnitario: precioUnitario,
+                TipoPago: tipoPago
+            };
+
+            console.log("Datos a enviar:", productoVenta);  // <-- Aquí imprimes los datos
+
+            $.ajax({
+                type: "POST",
+                url: "/Ventas/AgregarProductoVenta",
+                contentType: "application/json",
+                data: JSON.stringify(productoVenta),
+                success: function () {
+                    $("#productoInput").val('');
+                    $("#productoId").val('');
+                    $("#cantidad").val(1);
+                    $("#precioUnitario").val(0);
+                    cargarTabla();
+                },
+                error: function (jqXHR) {
+                    console.error("Error al agregar producto:", jqXHR.responseText);
+                    alert("Ocurrió un error al agregar el producto. Verifica los datos.");
+                }
+            });
+        }
+
+
+        function cargarTabla() {
+            $.getJSON("/Ventas/ObtenerProductosVenta", { idVenta: ventaId }, function (data) {
+                const tabla = $("#tablaProductos");
+                tabla.empty();
+                if (data.length === 0) {
+                    tabla.append("<tr><td colspan='6'>No hay productos agregados.</td></tr>");
+                    return;
+                }
+                data.forEach(function (item) {
+                    const total = item.cantidad * item.precioUnitario;
+                    tabla.append(`
+                        <tr>
+                            <td>${item.productoNombre}</td>
+                            <td>${item.cantidad}</td>
+                            <td>${item.tipoPago}</td>
+                            <td>$${item.precioUnitario.toFixed(2)}</td>
+                            <td>$${total.toFixed(2)}</td>
+                            <td class="acciones">
+                                <button onclick="eliminarProducto(${item.idProducto}, ${item.idVenta})">Eliminar</button>
+                            </td>
+                        </tr>
+                    `);
+                });
+            });
+        }
+
+        function eliminarProducto(idProducto, idVenta) {
+            $.ajax({
+                type: "POST",
+                url: "/Ventas/EliminarProductoVenta",
+                contentType: "application/json",
+                data: JSON.stringify([idProducto, idVenta]),
+                success: function () {
+                    cargarTabla();
+                }
+            });
+        }
+
+        function cancelarVenta() {
+            if (!confirm("¿Estás seguro que deseas cancelar esta venta? Se eliminarán los productos agregados.")) return;
+            $.ajax({
+                type: "POST",
+                url: "/Ventas/CancelarVenta",
+                contentType: "application/json",
+                data: JSON.stringify(ventaId),
+                success: function () {
+                    window.location.href = '@Url.Action("Create", "Ventas")';
+
+                }
+            });
+        }
+    </script>
+}

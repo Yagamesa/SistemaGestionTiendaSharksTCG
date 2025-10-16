@@ -1,0 +1,62 @@
+﻿@model ProyectoMDGSharksWeb.Models.CodigoTcg
+
+@{
+    ViewBag.Title = "Detalle del Código";
+    var cliente = Model.IdClienteNavigation;
+    var nombreCompleto = cliente != null ? $"{cliente.Nombre} {cliente.ApellidoPaterno} {cliente.ApellidoMaterno}" : "Cliente no disponible";
+}
+
+<h1>Detalle del Código TCG</h1>
+
+<div class="detalle-container">
+    <div class="detalle-item">
+        <strong>Cliente:</strong> @nombreCompleto
+    </div>
+
+    <div class="detalle-item">
+        <strong>Juego:</strong> @Model.Juego
+    </div>
+
+    <div class="detalle-item">
+        <strong>Código:</strong> @Model.Codigo
+    </div>
+
+    <a href="@Url.Action("Index", "Codigos")" class="btn-volver">Volver</a>
+</div>
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 25px;
+    }
+
+    .detalle-container {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 20px;
+        max-width: 500px;
+        background-color: #f9f9f9;
+    }
+
+    .detalle-item {
+        margin-bottom: 15px;
+        font-size: 1.1rem;
+        color: #333;
+    }
+
+    .btn-volver {
+        display: inline-block;
+        margin-top: 20px;
+        background-color: #0B3D91;
+        color: white;
+        padding: 10px 20px;
+        text-decoration: none;
+        border-radius: 6px;
+        font-weight: bold;
+    }
+
+        .btn-volver:hover {
+            background-color: #0053ba;
+        }
+</style>

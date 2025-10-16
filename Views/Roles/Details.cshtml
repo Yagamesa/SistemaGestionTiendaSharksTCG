@@ -1,0 +1,63 @@
+﻿@model ProyectoMDGSharksWeb.Models.Rol
+
+@{
+    ViewBag.Title = "Detalles del Rol";
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    label {
+        font-weight: 600;
+        margin-top: 10px;
+        display: block;
+    }
+
+    .detalle {
+        margin-bottom: 15px;
+        padding: 10px;
+        background-color: #f9f9f9;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        font-size: 1rem;
+    }
+
+    .btn-volver {
+        padding: 10px 20px;
+        font-weight: bold;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        background-color: #00bfff;
+        color: white;
+        text-decoration: none;
+        display: inline-block;
+        margin-top: 10px;
+    }
+
+        .btn-volver:hover {
+            background-color: #005f99;
+        }
+</style>
+
+<h1>Detalles del Rol</h1>
+
+<div>
+    <label>ID</label>
+    <div class="detalle">@Model.Id</div>
+</div>
+
+<div>
+    <label>Nombre del Rol</label>
+    <div class="detalle">@Model.Nombre</div>
+</div>
+
+<div>
+    <label>Descripción de Permisos</label>
+    <div class="detalle">@Model.Permisos</div>
+</div>
+
+<a asp-action="Index" class="btn-volver">Volver al Listado</a>

@@ -1,0 +1,75 @@
+﻿@model ProyectoMDGSharksWeb.Models.Producto
+
+@{
+    ViewBag.Title = "Detalles del Producto";
+    var stockActual = Model.Stocks?.Sum(s => s.TipoMovimiento == "Entrada" ? s.Cantidad : -s.Cantidad) ?? 0;
+    var returnUrl = ViewContext.HttpContext.Request.Headers["Referer"].ToString();
+}
+
+<h1>Detalles del Producto</h1>
+
+<div>
+    <p><strong>ID:</strong> @Model.Id</p>
+    <p><strong>Nombre:</strong> @Model.Nombre</p>
+    <p><strong>Descripción:</strong> @Model.Descripcion</p>
+    <p><strong>Categoría:</strong> @Model.IdCategoriaNavigation?.Nombre</p>
+    <p><strong>Precio Compra:</strong> @(Model.PrecioCompra?.ToString("F2") ?? "0.00") Bs</p>
+    <p><strong>Precio Venta:</strong> @(Model.PrecioVenta?.ToString("F2") ?? "0.00") Bs</p>
+    <p><strong>Precio SharkCoins:</strong> @(Model.PrecioSharkcoins?.ToString("F2") ?? "0.00")</p>
+    <p><strong>Stock Actual:</strong> @stockActual</p>
+</div>
+
+<a href="@Url.Action("Edit", "Productos", new { id = Model.Id })" class="btn-editar">Editar</a>
+
+@if (!string.IsNullOrEmpty(returnUrl))
+{
+    <a href="@returnUrl" class="btn-cancelar">Volver</a>
+}
+else
+{
+    <a href="@Url.Action("Index", "Productos")" class="btn-cancelar">Volver</a>
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+        margin-bottom: 20px;
+    }
+
+    p {
+        font-size: 1.1em;
+        margin: 10px 0;
+    }
+
+    .btn-editar {
+        background-color: #ffc107;
+        color: black;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        margin-right: 10px;
+        display: inline-block;
+    }
+
+        .btn-editar:hover {
+            background-color: #e0a800;
+        }
+
+    .btn-cancelar {
+        background-color: crimson;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        display: inline-block;
+    }
+
+        .btn-cancelar:hover {
+            background-color: darkred;
+        }
+</style>

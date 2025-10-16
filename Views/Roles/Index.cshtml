@@ -1,0 +1,114 @@
+﻿@model List<ProyectoMDGSharksWeb.Models.Rol>
+@{
+    ViewBag.Title = "Listado de Roles";
+}
+
+<style>
+    h1 {
+        font-weight: bold;
+        color: #001f3f;
+    }
+
+    .btn-nuevo {
+        display: inline-block;
+        background-color: #00bfff;
+        color: white;
+        padding: 10px 18px;
+        margin-bottom: 15px;
+        border: none;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+        .btn-nuevo:hover {
+            background-color: #005f99;
+        }
+
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+        table-layout: fixed;
+    }
+
+    colgroup col:nth-child(1) {
+        width: 10%;
+    }
+
+    colgroup col:nth-child(2) {
+        width: 25%;
+    }
+
+    colgroup col:nth-child(3) {
+        width: 45%;
+    }
+
+    colgroup col:nth-child(4) {
+        width: 20%;
+    }
+
+    th, td {
+        padding: 12px;
+        border-bottom: 1px solid #ddd;
+        text-align: left;
+        word-wrap: break-word;
+    }
+
+    th {
+        background-color: #0B3D91;
+        color: white;
+    }
+
+    tr:hover {
+        background-color: #00bfff;
+        color: #0B3D91;
+    }
+
+    .acciones a {
+        margin-right: 10px;
+        text-decoration: none;
+        font-weight: bold;
+        color: #0B3D91;
+    }
+
+        .acciones a:hover {
+            text-decoration: underline;
+        }
+</style>
+
+<h1>Listado de Roles</h1>
+
+<a href="@Url.Action("Create", "Roles")" class="btn-nuevo">+ Nuevo Rol</a>
+
+<table>
+    <colgroup>
+        <col />
+        <col />
+        <col />
+        <col />
+    </colgroup>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Nombre</th>
+            <th>Permisos</th>
+            <th>Acciones</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var rol in Model)
+        {
+            <tr>
+                <td>@rol.Id</td>
+                <td>@rol.Nombre</td>
+                <td>@rol.Permisos</td>
+                <td class="acciones">
+                    <a href="@Url.Action("Details", "Roles", new { id = rol.Id })">Ver</a>
+                    <a href="@Url.Action("Edit", "Roles", new { id = rol.Id })">Editar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
